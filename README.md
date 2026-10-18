@@ -1,7 +1,3 @@
-Readme · MD
-<div align="center">
-# 🎟️ mygos
- 
 ### Encuentra tu tribu
  
 App Android para descubrir eventos e ir acompañado: eliges un evento y la app te arma un grupo con gente afín para ir juntos. **Nadie llega solo.**
