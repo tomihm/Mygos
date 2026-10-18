@@ -10,19 +10,7 @@ App Android para descubrir eventos e ir acompañado: eliges un evento y la app t
 `MVP académico` · `DSY1105 Desarrollo de Aplicaciones Móviles` · `Duoc UC`
  
 </div>
----
- 
-## 📱 Capturas
- 
-<p align="center">
-  <img src="docs/login.png" width="240" alt="Pantalla de inicio" />
-  &nbsp;&nbsp;
-  <img src="docs/explorar.png" width="240" alt="Explorar eventos" />
-</p>
-> 💡 Toma las capturas desde el emulador de Android Studio y guárdalas en una carpeta `docs/` con esos nombres.
- 
----
- 
+
 ## ✨ Funcionalidades
  
 | | Funcionalidad | Estado |
