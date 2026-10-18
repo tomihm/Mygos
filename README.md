@@ -90,5 +90,3 @@ Las fotos de ejemplo de los eventos vienen de Wikimedia Commons. El detalle de a
 Hecho por **[Tomás Hernández](https://github.com/tomihm)** · Estudiante de Analista Programador en Duoc UC
  
 </div>
- 
-Claude terminó la respuesta
