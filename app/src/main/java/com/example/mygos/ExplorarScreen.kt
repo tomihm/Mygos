@@ -122,7 +122,6 @@ fun Encabezado(usuario: Usuario) {
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp
             )
-            // "Explorar" y "eventos" tienen distinta fuente
             Text(
                 text = buildAnnotatedString {
                     withStyle(SpanStyle(fontFamily = Nunito, fontWeight = FontWeight.Black, fontSize = 32.sp)) {
@@ -216,7 +215,6 @@ fun TarjetaEvento(evento: Evento) {
                     )
             )
 
-            // Fecha
             Column(
                 modifier = Modifier
                     .padding(14.dp)
@@ -244,7 +242,6 @@ fun TarjetaEvento(evento: Evento) {
                 )
             }
 
-            // Etiqueta de arriba a la derecha
             val textoEtiqueta = if (evento.yaTienesTribu) "Ya tienes tribu" else evento.categoria
             val fondoEtiqueta = if (evento.yaTienesTribu) Verde else Fondo.copy(alpha = 0.6f)
             Box(
@@ -290,7 +287,6 @@ fun TarjetaEvento(evento: Evento) {
             }
         }
 
-        // Parte de abajo: gente que va y tribus
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -310,7 +306,6 @@ fun TarjetaEvento(evento: Evento) {
                     )
                 }
             }
-            // el Box no cuenta el offset, por eso se suma el espacio a mano
             Spacer(modifier = Modifier.width((20 * (evento.asistentes.size - 1) + 10).dp))
             val texto = if (evento.tribus == 1) "1 tribu formándose" else "${evento.tribus} tribus formándose"
             Box(

@@ -83,7 +83,6 @@ fun LoginScreen(onEntrar: (Usuario) -> Unit) {
             letterSpacing = (-0.44).sp
         )
 
-        // Los dos anillos ocupan el espacio que sobra
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -243,7 +242,6 @@ fun BotonUsuario(
     }
 }
 
-// Anillo amarillo y anillo naranja que se cruzan (el naranja usa modo "screen")
 @Composable
 fun Anillos() {
     Canvas(

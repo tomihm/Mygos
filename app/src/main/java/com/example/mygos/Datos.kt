@@ -9,8 +9,6 @@ import com.example.mygos.ui.theme.Morado
 import com.example.mygos.ui.theme.Rosado
 import com.example.mygos.ui.theme.Turquesa
 
-// Datos ficticios para la demo, no hay backend
-
 data class Usuario(val nombre: String, val iniciales: String, val color: Color)
 
 data class Evento(
