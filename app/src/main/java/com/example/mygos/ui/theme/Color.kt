@@ -15,6 +15,7 @@ val TextoSuave = Color(0xFFB9B1AA)
 val TextoGris = Color(0xFF8F8781)
 val IconoGris = Color(0xFFA39C96)
 val TextoTarjeta = Color(0xFFE2DBD4)
+val TextoDescripcion = Color(0xFFD8D0C9)
 
 // Colores de los avatares
 val Rosado = Color(0xFFA8466A)
@@ -25,3 +26,5 @@ val Turquesa = Color(0xFF3A8F8F)
 val Ladrillo = Color(0xFFB0573A)
 val AzulGris = Color(0xFF4F6BB0)
 val NaranjaOscuro = Color(0xFFC9431A)
+val VerdeBosque = Color(0xFF2C7F55)
+val AzulClaro = Color(0xFF3A7BFF)

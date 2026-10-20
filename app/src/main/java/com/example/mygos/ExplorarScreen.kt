@@ -68,7 +68,7 @@ import com.example.mygos.ui.theme.TextoTarjeta
 import com.example.mygos.ui.theme.Verde
 
 @Composable
-fun ExplorarScreen(usuario: Usuario) {
+fun ExplorarScreen(usuario: Usuario, onVerEvento: (Evento) -> Unit) {
     var categoria by remember { mutableStateOf("Todos") }
 
     val eventosFiltrados = if (categoria == "Todos") {
@@ -99,7 +99,7 @@ fun ExplorarScreen(usuario: Usuario) {
                 )
             }
             items(eventosFiltrados) { evento ->
-                TarjetaEvento(evento)
+                TarjetaEvento(evento, onClick = { onVerEvento(evento) })
             }
         }
         BarraInferior()
@@ -181,7 +181,7 @@ fun Filtros(seleccionada: String, onSeleccionar: (String) -> Unit) {
 }
 
 @Composable
-fun TarjetaEvento(evento: Evento) {
+fun TarjetaEvento(evento: Evento, onClick: () -> Unit) {
     val forma = RoundedCornerShape(26.dp)
     Column(
         modifier = Modifier
@@ -190,6 +190,7 @@ fun TarjetaEvento(evento: Evento) {
             .clip(forma)
             .background(Tarjeta)
             .border(1.dp, Color.White.copy(alpha = 0.06f), forma)
+            .clickable { onClick() }
     ) {
         // Parte de arriba: foto del evento con un degradado para que se lea el texto
         Box(
@@ -278,7 +279,7 @@ fun TarjetaEvento(evento: Evento) {
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "${evento.organizador} · ${evento.hora}",
+                    text = "${evento.organizador.nombre} · ${evento.hora}",
                     color = TextoTarjeta,
                     fontFamily = Nunito,
                     fontWeight = FontWeight.Bold,
@@ -407,6 +408,6 @@ fun ItemBarra(icono: ImageVector, texto: String, activo: Boolean, aviso: Int = 0
 @Composable
 fun ExplorarPreview() {
     MygosTheme {
-        ExplorarScreen(usuario = valeM)
+        ExplorarScreen(usuario = valeM, onVerEvento = {})
     }
 }

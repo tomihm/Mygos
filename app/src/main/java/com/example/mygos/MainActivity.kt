@@ -22,13 +22,39 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             MygosTheme {
+                var pantalla by remember { mutableStateOf("bienvenida") }
                 var usuario by remember { mutableStateOf<Usuario?>(null) }
+
+                BackHandler(enabled = pantalla != "bienvenida") {
+                    pantalla = "bienvenida"
+                }
+
                 val actual = usuario
-                if (actual == null) {
-                    LoginScreen(onEntrar = { usuario = it })
-                } else {
-                    BackHandler { usuario = null }
-                    ExplorarScreen(usuario = actual)
+                when {
+                    pantalla == "iniciar" -> InicioSesionScreen(
+                        onVolver = { pantalla = "bienvenida" },
+                        onEntrar = {
+                            usuario = it
+                            pantalla = "explorar"
+                        },
+                        onIrACrearCuenta = { pantalla = "crear" }
+                    )
+                    pantalla == "crear" -> CrearCuentaScreen(
+                        onVolver = { pantalla = "bienvenida" },
+                        onCuentaCreada = {
+                            usuario = it
+                            pantalla = "explorar"
+                        },
+                        onIrAIniciarSesion = { pantalla = "iniciar" }
+                    )
+                    actual == null || pantalla == "bienvenida" -> BienvenidaScreen(
+                        onIniciarSesion = { pantalla = "iniciar" },
+                        onCrearCuenta = { pantalla = "crear" }
+                    )
+                    else -> ExplorarScreen(
+                        usuario = actual,
+                        onVerEvento = {}
+                    )
                 }
             }
         }
