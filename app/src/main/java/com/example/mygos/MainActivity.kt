@@ -24,9 +24,13 @@ class MainActivity : ComponentActivity() {
             MygosTheme {
                 var pantalla by remember { mutableStateOf("bienvenida") }
                 var usuario by remember { mutableStateOf<Usuario?>(null) }
+                var evento by remember { mutableStateOf(eventos[0]) }
 
                 BackHandler(enabled = pantalla != "bienvenida") {
-                    pantalla = "bienvenida"
+                    pantalla = when (pantalla) {
+                        "evento" -> "explorar"
+                        else -> "bienvenida"
+                    }
                 }
 
                 val actual = usuario
@@ -51,9 +55,17 @@ class MainActivity : ComponentActivity() {
                         onIniciarSesion = { pantalla = "iniciar" },
                         onCrearCuenta = { pantalla = "crear" }
                     )
+                    pantalla == "evento" -> EventoScreen(
+                        evento = evento,
+                        onVolver = { pantalla = "explorar" },
+                        onBuscarTribu = {}
+                    )
                     else -> ExplorarScreen(
                         usuario = actual,
-                        onVerEvento = {}
+                        onVerEvento = {
+                            evento = it
+                            pantalla = "evento"
+                        }
                     )
                 }
             }
