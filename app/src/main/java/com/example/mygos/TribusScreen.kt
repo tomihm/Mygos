@@ -1,0 +1,424 @@
+package com.example.mygos
+
+import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.GroupAdd
+import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material.icons.outlined.EventNote
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.ViewAgenda
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.mygos.ui.theme.Amarillo
+import com.example.mygos.ui.theme.Azul
+import com.example.mygos.ui.theme.BotonOscuro
+import com.example.mygos.ui.theme.Fondo
+import com.example.mygos.ui.theme.MygosTheme
+import com.example.mygos.ui.theme.Naranja
+import com.example.mygos.ui.theme.Nunito
+import com.example.mygos.ui.theme.Tarjeta
+import com.example.mygos.ui.theme.TextoClaro
+import com.example.mygos.ui.theme.TextoDescripcion
+import com.example.mygos.ui.theme.TextoGris
+import com.example.mygos.ui.theme.TextoSuave
+import com.example.mygos.ui.theme.Verde
+
+@Composable
+fun TribusScreen(evento: Evento, onVolver: () -> Unit, onUnirse: (Tribu) -> Unit) {
+    val context = LocalContext.current
+    val lista = tribusDe(evento)
+    var indice by remember { mutableIntStateOf(0) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Fondo)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            BotonCircular(Icons.AutoMirrored.Filled.ArrowBack, "Volver", onClick = onVolver)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "TRIBUS PARA TI",
+                    color = TextoGris,
+                    fontFamily = Nunito,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 12.sp,
+                    letterSpacing = 0.72.sp
+                )
+                Text(
+                    text = evento.titulo,
+                    color = TextoClaro,
+                    fontFamily = Nunito,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 16.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            BotonCircular(
+                icono = Icons.Outlined.ViewAgenda,
+                descripcion = "Ver como lista",
+                onClick = { Toast.makeText(context, "Próximamente", Toast.LENGTH_SHORT).show() }
+            )
+        }
+
+        // una barrita por cada tribu, como las historias
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 18.dp, end = 18.dp, top = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            for (i in lista.indices) {
+                val color = if (i <= indice) TextoClaro else Color.White.copy(alpha = 0.18f)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(color)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        if (indice < lista.size) {
+            val tribu = lista[indice]
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                TarjetaTribu(
+                    tribu = tribu,
+                    onInfo = {
+                        val nombres = tribu.integrantes.joinToString(", ") { it.nombre }
+                        Toast.makeText(context, "Integrantes: $nombres", Toast.LENGTH_LONG).show()
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(start = 14.dp, end = 14.dp, bottom = 44.dp)
+                )
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(22.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(74.dp)
+                            .shadow(14.dp, CircleShape)
+                            .clip(CircleShape)
+                            .background(TextoClaro)
+                            .clickable { indice++ },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Saltar tribu",
+                            tint = Azul,
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .width(154.dp)
+                            .height(74.dp)
+                            .shadow(16.dp, CircleShape, spotColor = Naranja, ambientColor = Naranja)
+                            .clip(CircleShape)
+                            .background(Naranja)
+                            .clickable { onUnirse(tribu) },
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.GroupAdd,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(30.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Unirme",
+                            color = Color.White,
+                            fontFamily = Nunito,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 17.sp
+                        )
+                    }
+                }
+            }
+        } else {
+            SinMasTribus(onVolverAEmpezar = { indice = 0 }, onVolver = onVolver)
+        }
+    }
+}
+
+@Composable
+fun TarjetaTribu(tribu: Tribu, onInfo: () -> Unit, modifier: Modifier = Modifier) {
+    val cuposLibres = tribu.cupos - tribu.integrantes.size
+    val textoCupos = if (cuposLibres == 1) "queda 1 cupo" else "quedan $cuposLibres cupos"
+
+    Column(
+        modifier = modifier
+            .shadow(20.dp, RoundedCornerShape(30.dp))
+            .clip(RoundedCornerShape(30.dp))
+            .background(Tarjeta)
+    ) {
+        Box {
+            // se muestran hasta 4 integrantes, si faltan queda un cupo libre
+            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                for (fila in 0..1) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                        for (columna in 0..1) {
+                            val persona = tribu.integrantes.getOrNull(fila * 2 + columna)
+                            CuadroIntegrante(persona, Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .padding(14.dp)
+                    .height(33.dp)
+                    .clip(CircleShape)
+                    .background(Amarillo)
+                    .padding(horizontal = 11.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Bolt,
+                    contentDescription = null,
+                    tint = Fondo,
+                    modifier = Modifier.size(17.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "${tribu.afinidad}% afinidad",
+                    color = Fondo,
+                    fontFamily = Nunito,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 13.sp
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(14.dp)
+                    .height(32.dp)
+                    .clip(CircleShape)
+                    .background(Fondo.copy(alpha = 0.65f))
+                    .padding(horizontal = 11.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Verified,
+                    contentDescription = null,
+                    tint = Verde,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "Todos verificados",
+                    color = TextoClaro,
+                    fontFamily = Nunito,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 12.sp
+                )
+            }
+        }
+
+        Column(modifier = Modifier.padding(18.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = tribu.nombre,
+                    color = TextoClaro,
+                    fontFamily = Nunito,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 28.sp,
+                    lineHeight = 28.sp,
+                    letterSpacing = (-0.56).sp,
+                    modifier = Modifier.weight(1f)
+                )
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(1.dp, Color.White.copy(alpha = 0.3f), CircleShape)
+                        .clickable { onInfo() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = "Ver integrantes",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "${tribu.integrantes.size} personas · $textoCupos",
+                color = TextoSuave,
+                fontFamily = Nunito,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                for (interes in tribu.intereses) {
+                    Box(
+                        modifier = Modifier
+                            .height(26.dp)
+                            .clip(CircleShape)
+                            .background(Naranja.copy(alpha = 0.22f))
+                            .border(1.dp, Naranja, CircleShape)
+                            .padding(horizontal = 11.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = interes,
+                            color = TextoClaro,
+                            fontFamily = Nunito,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(14.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Outlined.EventNote,
+                    contentDescription = null,
+                    tint = Naranja,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Plan:  ${tribu.plan}",
+                    color = TextoDescripcion,
+                    fontFamily = Nunito,
+                    fontSize = 13.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CuadroIntegrante(persona: Usuario?, modifier: Modifier = Modifier) {
+    val fondo = persona?.color ?: BotonOscuro
+    Box(
+        modifier = modifier
+            .height(148.dp)
+            .background(fondo)
+            .rayas()
+            .background(Brush.verticalGradient(0.5f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.45f)))
+    ) {
+        Text(
+            text = persona?.nombre ?: "Cupo libre",
+            color = if (persona == null) TextoGris else TextoClaro,
+            fontFamily = Nunito,
+            fontWeight = FontWeight.Black,
+            fontSize = 13.sp,
+            style = TextStyle(shadow = Shadow(Color.Black.copy(alpha = 0.6f), Offset(0f, 2f), 8f)),
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 10.dp, bottom = 8.dp)
+        )
+    }
+}
+
+@Composable
+fun SinMasTribus(onVolverAEmpezar: () -> Unit, onVolver: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Ya viste todas las tribus",
+            color = TextoClaro,
+            fontFamily = Nunito,
+            fontWeight = FontWeight.Black,
+            fontSize = 22.sp,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Puedes revisarlas otra vez o volver al evento.",
+            color = TextoSuave,
+            fontFamily = Nunito,
+            fontSize = 15.sp,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        BotonNaranja(texto = "Ver de nuevo", onClick = onVolverAEmpezar)
+        Spacer(modifier = Modifier.height(14.dp))
+        TextoEnlace("", "Volver al evento", onClick = onVolver)
+    }
+}
+
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+fun TribusPreview() {
+    MygosTheme {
+        TribusScreen(evento = eventos[0], onVolver = {}, onUnirse = {})
+    }
+}
