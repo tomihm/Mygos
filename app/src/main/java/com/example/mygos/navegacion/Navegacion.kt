@@ -11,14 +11,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.mygos.BienvenidaScreen
-import com.example.mygos.CrearCuentaScreen
-import com.example.mygos.EventoScreen
-import com.example.mygos.ExplorarScreen
-import com.example.mygos.InicioSesionScreen
-import com.example.mygos.TribusScreen
+import com.example.mygos.CrearCuentaRuta
+import com.example.mygos.EventoRuta
+import com.example.mygos.ExplorarRuta
+import com.example.mygos.InicioSesionRuta
+import com.example.mygos.TribusRuta
 import com.example.mygos.Usuario
 import com.example.mygos.repository.CuentaRepository
-import com.example.mygos.repository.EventoRepository
 
 object Rutas {
     const val BIENVENIDA = "bienvenida"
@@ -46,7 +45,7 @@ fun MygosNavHost(navController: NavHostController = rememberNavController()) {
         }
 
         composable(Rutas.INICIAR_SESION) {
-            InicioSesionScreen(
+            InicioSesionRuta(
                 onVolver = { navController.popBackStack() },
                 onEntrar = { irAExplorar(navController) },
                 onIrACrearCuenta = {
@@ -58,7 +57,7 @@ fun MygosNavHost(navController: NavHostController = rememberNavController()) {
         }
 
         composable(Rutas.CREAR_CUENTA) {
-            CrearCuentaScreen(
+            CrearCuentaRuta(
                 onVolver = { navController.popBackStack() },
                 onCuentaCreada = { irAExplorar(navController) },
                 onIrAIniciarSesion = {
@@ -71,7 +70,7 @@ fun MygosNavHost(navController: NavHostController = rememberNavController()) {
 
         composable(Rutas.EXPLORAR) {
             ConSesion(navController) { usuario ->
-                ExplorarScreen(
+                ExplorarRuta(
                     usuario = usuario,
                     onVerEvento = { navController.navigate(Rutas.evento(it.id)) }
                 )
@@ -83,11 +82,10 @@ fun MygosNavHost(navController: NavHostController = rememberNavController()) {
             arguments = listOf(navArgument("eventoId") { type = NavType.IntType })
         ) { entrada ->
             val id = entrada.arguments?.getInt("eventoId") ?: 0
-            val evento = EventoRepository.buscarEvento(id) ?: return@composable
-            EventoScreen(
-                evento = evento,
+            EventoRuta(
+                eventoId = id,
                 onVolver = { navController.popBackStack() },
-                onBuscarTribu = { navController.navigate(Rutas.tribus(evento.id)) }
+                onBuscarTribu = { navController.navigate(Rutas.tribus(id)) }
             )
         }
 
@@ -96,10 +94,9 @@ fun MygosNavHost(navController: NavHostController = rememberNavController()) {
             arguments = listOf(navArgument("eventoId") { type = NavType.IntType })
         ) { entrada ->
             val id = entrada.arguments?.getInt("eventoId") ?: 0
-            val evento = EventoRepository.buscarEvento(id) ?: return@composable
             ConSesion(navController) { usuario ->
-                TribusScreen(
-                    evento = evento,
+                TribusRuta(
+                    eventoId = id,
                     usuario = usuario,
                     onVolver = { navController.popBackStack() },
                     onUnirse = {

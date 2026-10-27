@@ -29,6 +29,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,9 +43,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mygos.viewmodel.EventoViewModel
 import com.example.mygos.ui.theme.Amarillo
 import com.example.mygos.ui.theme.Fondo
-import com.example.mygos.repository.EventoRepository
+import com.example.mygos.data.eventosIniciales
 import com.example.mygos.ui.theme.MygosTheme
 import com.example.mygos.ui.theme.Naranja
 import com.example.mygos.ui.theme.Nunito
@@ -51,6 +55,18 @@ import com.example.mygos.ui.theme.Tarjeta
 import com.example.mygos.ui.theme.TextoClaro
 import com.example.mygos.ui.theme.TextoDescripcion
 import com.example.mygos.ui.theme.TextoSuave
+
+@Composable
+fun EventoRuta(
+    eventoId: Int,
+    onVolver: () -> Unit,
+    onBuscarTribu: () -> Unit,
+    viewModel: EventoViewModel = viewModel { EventoViewModel(eventoId) }
+) {
+    val evento by viewModel.evento.collectAsState()
+    // mientras Room carga el evento no se dibuja nada
+    evento?.let { EventoScreen(it, onVolver, onBuscarTribu) }
+}
 
 @Composable
 fun EventoScreen(evento: Evento, onVolver: () -> Unit, onBuscarTribu: () -> Unit) {
@@ -279,6 +295,6 @@ fun TextosInfo(titulo: String, detalle: String) {
 @Composable
 fun EventoPreview() {
     MygosTheme {
-        EventoScreen(evento = EventoRepository.obtenerEventos()[0], onVolver = {}, onBuscarTribu = {})
+        EventoScreen(evento = eventosIniciales[0], onVolver = {}, onBuscarTribu = {})
     }
 }

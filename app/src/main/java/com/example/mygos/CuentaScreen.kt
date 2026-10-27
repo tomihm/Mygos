@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -37,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mygos.data.cuentasIniciales
 import com.example.mygos.ui.theme.Fondo
 import com.example.mygos.ui.theme.InstrumentSerif
 import com.example.mygos.ui.theme.MygosTheme
@@ -46,17 +48,51 @@ import com.example.mygos.ui.theme.Tarjeta
 import com.example.mygos.ui.theme.TextoClaro
 import com.example.mygos.ui.theme.TextoGris
 import com.example.mygos.ui.theme.TextoSuave
+import com.example.mygos.viewmodel.CrearCuentaEstado
 import com.example.mygos.viewmodel.CrearCuentaViewModel
+import com.example.mygos.viewmodel.InicioSesionEstado
 import com.example.mygos.viewmodel.InicioSesionViewModel
 
+// Conecta la pantalla con su ViewModel
 @Composable
-fun InicioSesionScreen(
+fun InicioSesionRuta(
     onVolver: () -> Unit,
     onEntrar: () -> Unit,
     onIrACrearCuenta: () -> Unit,
     viewModel: InicioSesionViewModel = viewModel()
 ) {
     val estado by viewModel.estado.collectAsState()
+    val cuentas by viewModel.cuentasDePrueba.collectAsState()
+
+    // Cuando el ViewModel confirma la sesion, se navega una sola vez
+    LaunchedEffect(estado.entro) {
+        if (estado.entro) onEntrar()
+    }
+
+    InicioSesionScreen(
+        estado = estado,
+        cuentasDePrueba = cuentas,
+        onCambiarCorreo = viewModel::cambiarCorreo,
+        onCambiarClave = viewModel::cambiarClave,
+        onElegirCuenta = viewModel::elegirCuenta,
+        onEntrar = viewModel::iniciarSesion,
+        onVolver = onVolver,
+        onIrACrearCuenta = onIrACrearCuenta
+    )
+}
+
+// Solo dibuja: recibe el estado y avisa lo que toca el usuario
+@Composable
+fun InicioSesionScreen(
+    estado: InicioSesionEstado,
+    cuentasDePrueba: List<Cuenta>,
+    onCambiarCorreo: (String) -> Unit,
+    onCambiarClave: (String) -> Unit,
+    onElegirCuenta: (Cuenta) -> Unit,
+    onEntrar: () -> Unit,
+    onVolver: () -> Unit,
+    onIrACrearCuenta: () -> Unit
+) {
 
     Column(
         modifier = Modifier
@@ -83,14 +119,14 @@ fun InicioSesionScreen(
         Spacer(modifier = Modifier.height(24.dp))
         CampoTexto(
             valor = estado.correo,
-            onCambio = viewModel::cambiarCorreo,
+            onCambio = onCambiarCorreo,
             etiqueta = "Correo",
             tipo = KeyboardType.Email
         )
         Spacer(modifier = Modifier.height(12.dp))
         CampoTexto(
             valor = estado.clave,
-            onCambio = viewModel::cambiarClave,
+            onCambio = onCambiarClave,
             etiqueta = "Contraseña",
             tipo = KeyboardType.Password,
             esClave = true
@@ -103,9 +139,7 @@ fun InicioSesionScreen(
         Spacer(modifier = Modifier.height(20.dp))
         BotonNaranja(
             texto = "Entrar",
-            onClick = {
-                if (viewModel.iniciarSesion() != null) onEntrar()
-            }
+            onClick = onEntrar
         )
 
         Spacer(modifier = Modifier.height(28.dp))
@@ -119,11 +153,11 @@ fun InicioSesionScreen(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            for (cuenta in viewModel.cuentasDePrueba) {
+            for (cuenta in cuentasDePrueba) {
                 FilaCuenta(
                     cuenta = cuenta,
                     seleccionada = cuenta.correo == estado.correo,
-                    onClick = { viewModel.elegirCuenta(cuenta) }
+                    onClick = { onElegirCuenta(cuenta) }
                 )
             }
         }
@@ -135,13 +169,39 @@ fun InicioSesionScreen(
 }
 
 @Composable
-fun CrearCuentaScreen(
+fun CrearCuentaRuta(
     onVolver: () -> Unit,
     onCuentaCreada: () -> Unit,
     onIrAIniciarSesion: () -> Unit,
     viewModel: CrearCuentaViewModel = viewModel()
 ) {
     val estado by viewModel.estado.collectAsState()
+
+    LaunchedEffect(estado.creada) {
+        if (estado.creada) onCuentaCreada()
+    }
+
+    CrearCuentaScreen(
+        estado = estado,
+        onCambiarNombre = viewModel::cambiarNombre,
+        onCambiarCorreo = viewModel::cambiarCorreo,
+        onCambiarClave = viewModel::cambiarClave,
+        onCrearCuenta = viewModel::crearCuenta,
+        onVolver = onVolver,
+        onIrAIniciarSesion = onIrAIniciarSesion
+    )
+}
+
+@Composable
+fun CrearCuentaScreen(
+    estado: CrearCuentaEstado,
+    onCambiarNombre: (String) -> Unit,
+    onCambiarCorreo: (String) -> Unit,
+    onCambiarClave: (String) -> Unit,
+    onCrearCuenta: () -> Unit,
+    onVolver: () -> Unit,
+    onIrAIniciarSesion: () -> Unit
+) {
 
     Column(
         modifier = Modifier
@@ -168,20 +228,20 @@ fun CrearCuentaScreen(
         Spacer(modifier = Modifier.height(24.dp))
         CampoTexto(
             valor = estado.nombre,
-            onCambio = viewModel::cambiarNombre,
+            onCambio = onCambiarNombre,
             etiqueta = "Nombre de usuario"
         )
         Spacer(modifier = Modifier.height(12.dp))
         CampoTexto(
             valor = estado.correo,
-            onCambio = viewModel::cambiarCorreo,
+            onCambio = onCambiarCorreo,
             etiqueta = "Correo",
             tipo = KeyboardType.Email
         )
         Spacer(modifier = Modifier.height(12.dp))
         CampoTexto(
             valor = estado.clave,
-            onCambio = viewModel::cambiarClave,
+            onCambio = onCambiarClave,
             etiqueta = "Contraseña",
             tipo = KeyboardType.Password,
             esClave = true
@@ -196,9 +256,7 @@ fun CrearCuentaScreen(
         Spacer(modifier = Modifier.height(20.dp))
         BotonNaranja(
             texto = "Crear cuenta",
-            onClick = {
-                if (viewModel.crearCuenta() != null) onCuentaCreada()
-            }
+            onClick = onCrearCuenta
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -288,7 +346,16 @@ fun TextoEnlace(texto: String, enlace: String, onClick: () -> Unit) {
 @Composable
 fun InicioSesionPreview() {
     MygosTheme {
-        InicioSesionScreen(onVolver = {}, onEntrar = {}, onIrACrearCuenta = {})
+        InicioSesionScreen(
+            estado = InicioSesionEstado(correo = "vale@mygos.cl", clave = "1234"),
+            cuentasDePrueba = cuentasIniciales,
+            onCambiarCorreo = {},
+            onCambiarClave = {},
+            onElegirCuenta = {},
+            onEntrar = {},
+            onVolver = {},
+            onIrACrearCuenta = {}
+        )
     }
 }
 
@@ -296,6 +363,14 @@ fun InicioSesionPreview() {
 @Composable
 fun CrearCuentaPreview() {
     MygosTheme {
-        CrearCuentaScreen(onVolver = {}, onCuentaCreada = {}, onIrAIniciarSesion = {})
+        CrearCuentaScreen(
+            estado = CrearCuentaEstado(),
+            onCambiarNombre = {},
+            onCambiarCorreo = {},
+            onCambiarClave = {},
+            onCrearCuenta = {},
+            onVolver = {},
+            onIrAIniciarSesion = {}
+        )
     }
 }

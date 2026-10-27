@@ -1,27 +1,34 @@
 package com.example.mygos.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.mygos.Evento
 import com.example.mygos.repository.EventoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 
 data class ExplorarEstado(
     val categorias: List<String> = EventoRepository.obtenerCategorias(),
     val categoria: String = "Todos",
-    val eventos: List<Evento> = EventoRepository.obtenerEventos()
+    val eventos: List<Evento> = emptyList()
 )
 
 class ExplorarViewModel : ViewModel() {
 
-    private val _estado = MutableStateFlow(ExplorarEstado())
-    val estado: StateFlow<ExplorarEstado> = _estado.asStateFlow()
+    private val categoria = MutableStateFlow("Todos")
 
-    fun elegirCategoria(categoria: String) {
-        _estado.update {
-            it.copy(categoria = categoria, eventos = EventoRepository.eventosDeCategoria(categoria))
-        }
+    // combine: se recalcula cuando cambia la categoria o cuando cambian los eventos en la base
+    val estado: StateFlow<ExplorarEstado> = combine(categoria, EventoRepository.eventos()) { elegida, eventos ->
+        ExplorarEstado(
+            categoria = elegida,
+            eventos = if (elegida == "Todos") eventos else eventos.filter { it.categoria == elegida }
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ExplorarEstado())
+
+    fun elegirCategoria(nueva: String) {
+        categoria.value = nueva
     }
 }

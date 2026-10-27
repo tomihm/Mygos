@@ -52,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mygos.data.eventosIniciales
 import com.example.mygos.ui.theme.Amarillo
 import com.example.mygos.ui.theme.Fondo
 import com.example.mygos.ui.theme.IconoGris
@@ -65,15 +66,31 @@ import com.example.mygos.ui.theme.TextoGris
 import com.example.mygos.ui.theme.TextoSuave
 import com.example.mygos.ui.theme.TextoTarjeta
 import com.example.mygos.ui.theme.Verde
+import com.example.mygos.viewmodel.ExplorarEstado
 import com.example.mygos.viewmodel.ExplorarViewModel
 
 @Composable
-fun ExplorarScreen(
+fun ExplorarRuta(
     usuario: Usuario,
     onVerEvento: (Evento) -> Unit,
     viewModel: ExplorarViewModel = viewModel()
 ) {
     val estado by viewModel.estado.collectAsState()
+    ExplorarScreen(
+        usuario = usuario,
+        estado = estado,
+        onElegirCategoria = viewModel::elegirCategoria,
+        onVerEvento = onVerEvento
+    )
+}
+
+@Composable
+fun ExplorarScreen(
+    usuario: Usuario,
+    estado: ExplorarEstado,
+    onElegirCategoria: (String) -> Unit,
+    onVerEvento: (Evento) -> Unit
+) {
 
     Column(
         modifier = Modifier
@@ -94,7 +111,7 @@ fun ExplorarScreen(
                 Filtros(
                     categorias = estado.categorias,
                     seleccionada = estado.categoria,
-                    onSeleccionar = viewModel::elegirCategoria
+                    onSeleccionar = onElegirCategoria
                 )
             }
             items(estado.eventos) { evento ->
@@ -407,6 +424,11 @@ fun ItemBarra(icono: ImageVector, texto: String, activo: Boolean, aviso: Int = 0
 @Composable
 fun ExplorarPreview() {
     MygosTheme {
-        ExplorarScreen(usuario = valeM, onVerEvento = {})
+        ExplorarScreen(
+            usuario = valeM,
+            estado = ExplorarEstado(eventos = eventosIniciales),
+            onElegirCategoria = {},
+            onVerEvento = {}
+        )
     }
 }

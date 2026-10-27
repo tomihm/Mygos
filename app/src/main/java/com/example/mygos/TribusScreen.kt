@@ -31,6 +31,7 @@ import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -54,7 +55,8 @@ import com.example.mygos.ui.theme.Amarillo
 import com.example.mygos.ui.theme.Azul
 import com.example.mygos.ui.theme.BotonOscuro
 import com.example.mygos.ui.theme.Fondo
-import com.example.mygos.repository.EventoRepository
+import com.example.mygos.data.eventosIniciales
+import com.example.mygos.data.tribusIniciales
 import com.example.mygos.ui.theme.MygosTheme
 import com.example.mygos.ui.theme.Naranja
 import com.example.mygos.ui.theme.Nunito
@@ -64,18 +66,54 @@ import com.example.mygos.ui.theme.TextoDescripcion
 import com.example.mygos.ui.theme.TextoGris
 import com.example.mygos.ui.theme.TextoSuave
 import com.example.mygos.ui.theme.Verde
+import com.example.mygos.viewmodel.TribusEstado
 import com.example.mygos.viewmodel.TribusViewModel
+
+@Composable
+fun TribusRuta(
+    eventoId: Int,
+    usuario: Usuario,
+    onVolver: () -> Unit,
+    onUnirse: (Tribu) -> Unit,
+    viewModel: TribusViewModel = viewModel { TribusViewModel(eventoId) }
+) {
+    val context = LocalContext.current
+    val estado by viewModel.estado.collectAsState()
+
+    LaunchedEffect(estado.unidoA) {
+        estado.unidoA?.let(onUnirse)
+    }
+    LaunchedEffect(estado.error) {
+        if (estado.error.isNotEmpty()) {
+            Toast.makeText(context, estado.error, Toast.LENGTH_SHORT).show()
+            viewModel.errorMostrado()
+        }
+    }
+
+    // mientras Room carga el evento no se dibuja nada
+    val evento = estado.evento
+    if (evento != null) {
+        TribusScreen(
+            evento = evento,
+            estado = estado,
+            onSaltar = viewModel::saltar,
+            onUnirme = { viewModel.unirse(usuario) },
+            onVerDeNuevo = viewModel::verDeNuevo,
+            onVolver = onVolver
+        )
+    }
+}
 
 @Composable
 fun TribusScreen(
     evento: Evento,
-    usuario: Usuario,
-    onVolver: () -> Unit,
-    onUnirse: (Tribu) -> Unit,
-    viewModel: TribusViewModel = viewModel { TribusViewModel(evento) }
+    estado: TribusEstado,
+    onSaltar: () -> Unit,
+    onUnirme: () -> Unit,
+    onVerDeNuevo: () -> Unit,
+    onVolver: () -> Unit
 ) {
     val context = LocalContext.current
-    val estado by viewModel.estado.collectAsState()
 
     Column(
         modifier = Modifier
@@ -168,7 +206,7 @@ fun TribusScreen(
                             .shadow(14.dp, CircleShape)
                             .clip(CircleShape)
                             .background(TextoClaro)
-                            .clickable { viewModel.saltar() },
+                            .clickable { onSaltar() },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -185,13 +223,7 @@ fun TribusScreen(
                             .shadow(16.dp, CircleShape, spotColor = Naranja, ambientColor = Naranja)
                             .clip(CircleShape)
                             .background(Naranja)
-                            .clickable {
-                                if (viewModel.unirse(usuario)) {
-                                    onUnirse(tribu)
-                                } else {
-                                    Toast.makeText(context, "Esta tribu ya está llena", Toast.LENGTH_SHORT).show()
-                                }
-                            },
+                            .clickable { onUnirme() },
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -213,7 +245,7 @@ fun TribusScreen(
                 }
             }
         } else {
-            SinMasTribus(onVolverAEmpezar = viewModel::verDeNuevo, onVolver = onVolver)
+            SinMasTribus(onVolverAEmpezar = onVerDeNuevo, onVolver = onVolver)
         }
     }
 }
@@ -431,6 +463,13 @@ fun SinMasTribus(onVolverAEmpezar: () -> Unit, onVolver: () -> Unit) {
 @Composable
 fun TribusPreview() {
     MygosTheme {
-        TribusScreen(evento = EventoRepository.obtenerEventos()[0], usuario = valeM, onVolver = {}, onUnirse = {})
+        TribusScreen(
+            evento = eventosIniciales[0],
+            estado = TribusEstado(tribus = tribusIniciales.filter { it.eventoId == 1 }),
+            onSaltar = {},
+            onUnirme = {},
+            onVerDeNuevo = {},
+            onVolver = {}
+        )
     }
 }
