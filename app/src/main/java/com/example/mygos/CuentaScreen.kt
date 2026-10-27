@@ -22,10 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +36,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mygos.ui.theme.Fondo
 import com.example.mygos.ui.theme.InstrumentSerif
 import com.example.mygos.ui.theme.MygosTheme
@@ -47,16 +46,17 @@ import com.example.mygos.ui.theme.Tarjeta
 import com.example.mygos.ui.theme.TextoClaro
 import com.example.mygos.ui.theme.TextoGris
 import com.example.mygos.ui.theme.TextoSuave
+import com.example.mygos.viewmodel.CrearCuentaViewModel
+import com.example.mygos.viewmodel.InicioSesionViewModel
 
 @Composable
 fun InicioSesionScreen(
     onVolver: () -> Unit,
     onEntrar: (Usuario) -> Unit,
-    onIrACrearCuenta: () -> Unit
+    onIrACrearCuenta: () -> Unit,
+    viewModel: InicioSesionViewModel = viewModel()
 ) {
-    var correo by remember { mutableStateOf("") }
-    var clave by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf("") }
+    val estado by viewModel.estado.collectAsState()
 
     Column(
         modifier = Modifier
@@ -82,36 +82,30 @@ fun InicioSesionScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
         CampoTexto(
-            valor = correo,
-            onCambio = { correo = it; error = "" },
+            valor = estado.correo,
+            onCambio = viewModel::cambiarCorreo,
             etiqueta = "Correo",
             tipo = KeyboardType.Email
         )
         Spacer(modifier = Modifier.height(12.dp))
         CampoTexto(
-            valor = clave,
-            onCambio = { clave = it; error = "" },
+            valor = estado.clave,
+            onCambio = viewModel::cambiarClave,
             etiqueta = "Contraseña",
             tipo = KeyboardType.Password,
             esClave = true
         )
-        if (error.isNotEmpty()) {
+        if (estado.error.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = error, color = Naranja, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            Text(text = estado.error, color = Naranja, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 13.sp)
         }
 
         Spacer(modifier = Modifier.height(20.dp))
         BotonNaranja(
             texto = "Entrar",
             onClick = {
-                val usuario = buscarCuenta(correo, clave)
-                if (correo.isBlank() || clave.isBlank()) {
-                    error = "Completa tu correo y contraseña"
-                } else if (usuario == null) {
-                    error = "Correo o contraseña incorrectos"
-                } else {
-                    onEntrar(usuario)
-                }
+                val usuario = viewModel.iniciarSesion()
+                if (usuario != null) onEntrar(usuario)
             }
         )
 
@@ -126,15 +120,11 @@ fun InicioSesionScreen(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            for (cuenta in cuentas) {
+            for (cuenta in viewModel.cuentasDePrueba) {
                 FilaCuenta(
                     cuenta = cuenta,
-                    seleccionada = cuenta.correo == correo,
-                    onClick = {
-                        correo = cuenta.correo
-                        clave = cuenta.clave
-                        error = ""
-                    }
+                    seleccionada = cuenta.correo == estado.correo,
+                    onClick = { viewModel.elegirCuenta(cuenta) }
                 )
             }
         }
@@ -149,12 +139,10 @@ fun InicioSesionScreen(
 fun CrearCuentaScreen(
     onVolver: () -> Unit,
     onCuentaCreada: (Usuario) -> Unit,
-    onIrAIniciarSesion: () -> Unit
+    onIrAIniciarSesion: () -> Unit,
+    viewModel: CrearCuentaViewModel = viewModel()
 ) {
-    var nombre by remember { mutableStateOf("") }
-    var correo by remember { mutableStateOf("") }
-    var clave by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf("") }
+    val estado by viewModel.estado.collectAsState()
 
     Column(
         modifier = Modifier
@@ -180,28 +168,28 @@ fun CrearCuentaScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
         CampoTexto(
-            valor = nombre,
-            onCambio = { nombre = it; error = "" },
+            valor = estado.nombre,
+            onCambio = viewModel::cambiarNombre,
             etiqueta = "Nombre de usuario"
         )
         Spacer(modifier = Modifier.height(12.dp))
         CampoTexto(
-            valor = correo,
-            onCambio = { correo = it; error = "" },
+            valor = estado.correo,
+            onCambio = viewModel::cambiarCorreo,
             etiqueta = "Correo",
             tipo = KeyboardType.Email
         )
         Spacer(modifier = Modifier.height(12.dp))
         CampoTexto(
-            valor = clave,
-            onCambio = { clave = it; error = "" },
+            valor = estado.clave,
+            onCambio = viewModel::cambiarClave,
             etiqueta = "Contraseña",
             tipo = KeyboardType.Password,
             esClave = true
         )
         Spacer(modifier = Modifier.height(8.dp))
-        if (error.isNotEmpty()) {
-            Text(text = error, color = Naranja, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+        if (estado.error.isNotEmpty()) {
+            Text(text = estado.error, color = Naranja, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 13.sp)
         } else {
             Text(text = "Mínimo 4 caracteres", color = TextoGris, fontFamily = Nunito, fontSize = 13.sp)
         }
@@ -210,17 +198,8 @@ fun CrearCuentaScreen(
         BotonNaranja(
             texto = "Crear cuenta",
             onClick = {
-                if (nombre.isBlank() || correo.isBlank() || clave.isBlank()) {
-                    error = "Completa todos los campos"
-                } else if (!correo.contains("@") || !correo.contains(".")) {
-                    error = "El correo no es válido"
-                } else if (clave.length < 4) {
-                    error = "La contraseña debe tener al menos 4 caracteres"
-                } else if (existeCorreo(correo)) {
-                    error = "Ya existe una cuenta con ese correo"
-                } else {
-                    onCuentaCreada(crearCuenta(nombre, correo, clave))
-                }
+                val usuario = viewModel.crearCuenta()
+                if (usuario != null) onCuentaCreada(usuario)
             }
         )
 

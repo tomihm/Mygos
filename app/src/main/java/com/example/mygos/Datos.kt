@@ -7,7 +7,6 @@ import com.example.mygos.ui.theme.AzulGris
 import com.example.mygos.ui.theme.Dorado
 import com.example.mygos.ui.theme.Ladrillo
 import com.example.mygos.ui.theme.Morado
-import com.example.mygos.ui.theme.NaranjaOscuro
 import com.example.mygos.ui.theme.Rosado
 import com.example.mygos.ui.theme.Turquesa
 import com.example.mygos.ui.theme.VerdeBosque
@@ -57,37 +56,6 @@ val juanP = Usuario("Juan.P", "JP", VerdeBosque)
 val productoraSonora = Usuario("Productora Sonora", "PS", AzulClaro)
 val cineclubNorte = Usuario("Cineclub Norte", "CN", Morado)
 val ludotecaCentral = Usuario("Ludoteca Central", "LC", VerdeBosque)
-
-// No hay backend, las cuentas viven en memoria mientras la app esta abierta
-val cuentas = mutableListOf(
-    Cuenta("vale@mygos.cl", "1234", valeM),
-    Cuenta("nico@mygos.cl", "1234", nicoT),
-    Cuenta("cami@mygos.cl", "1234", camiR)
-)
-
-val coloresNuevos = listOf(Turquesa, Ladrillo, Dorado, AzulGris, NaranjaOscuro, VerdeBosque)
-
-fun buscarCuenta(correo: String, clave: String): Usuario? {
-    val cuenta = cuentas.find { it.correo == correo.trim().lowercase() && it.clave == clave }
-    return cuenta?.usuario
-}
-
-fun existeCorreo(correo: String): Boolean {
-    return cuentas.any { it.correo == correo.trim().lowercase() }
-}
-
-fun crearCuenta(nombre: String, correo: String, clave: String): Usuario {
-    val palabras = nombre.trim().split(" ", ".", "_").filter { it.isNotEmpty() }
-    val iniciales = if (palabras.size >= 2) {
-        "${palabras[0][0]}${palabras[1][0]}"
-    } else {
-        palabras[0].take(2)
-    }
-    val color = coloresNuevos[cuentas.size % coloresNuevos.size]
-    val usuario = Usuario(nombre.trim(), iniciales.uppercase(), color)
-    cuentas.add(Cuenta(correo.trim().lowercase(), clave, usuario))
-    return usuario
-}
 
 val categorias = listOf("Todos", "Música", "Cine", "Juegos")
 
