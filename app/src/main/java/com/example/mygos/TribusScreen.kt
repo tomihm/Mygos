@@ -31,10 +31,8 @@ import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,6 +49,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mygos.ui.theme.Amarillo
 import com.example.mygos.ui.theme.Azul
 import com.example.mygos.ui.theme.BotonOscuro
@@ -65,12 +64,19 @@ import com.example.mygos.ui.theme.TextoDescripcion
 import com.example.mygos.ui.theme.TextoGris
 import com.example.mygos.ui.theme.TextoSuave
 import com.example.mygos.ui.theme.Verde
+import com.example.mygos.viewmodel.TribusViewModel
 
 @Composable
-fun TribusScreen(evento: Evento, onVolver: () -> Unit, onUnirse: (Tribu) -> Unit) {
+fun TribusScreen(
+    evento: Evento,
+    usuario: Usuario,
+    onVolver: () -> Unit,
+    onUnirse: (Tribu) -> Unit,
+    // key: un ViewModel distinto por evento, asi no se mezcla el avance entre eventos
+    viewModel: TribusViewModel = viewModel(key = evento.titulo) { TribusViewModel(evento) }
+) {
     val context = LocalContext.current
-    val lista = tribusDe(evento)
-    var indice by remember { mutableIntStateOf(0) }
+    val estado by viewModel.estado.collectAsState()
 
     Column(
         modifier = Modifier
@@ -121,8 +127,8 @@ fun TribusScreen(evento: Evento, onVolver: () -> Unit, onUnirse: (Tribu) -> Unit
                 .padding(start = 18.dp, end = 18.dp, top = 14.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            for (i in lista.indices) {
-                val color = if (i <= indice) TextoClaro else Color.White.copy(alpha = 0.18f)
+            for (i in estado.tribus.indices) {
+                val color = if (i <= estado.indice) TextoClaro else Color.White.copy(alpha = 0.18f)
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -134,8 +140,8 @@ fun TribusScreen(evento: Evento, onVolver: () -> Unit, onUnirse: (Tribu) -> Unit
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        if (indice < lista.size) {
-            val tribu = lista[indice]
+        val tribu = estado.tribuActual
+        if (tribu != null) {
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -163,7 +169,7 @@ fun TribusScreen(evento: Evento, onVolver: () -> Unit, onUnirse: (Tribu) -> Unit
                             .shadow(14.dp, CircleShape)
                             .clip(CircleShape)
                             .background(TextoClaro)
-                            .clickable { indice++ },
+                            .clickable { viewModel.saltar() },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -180,7 +186,13 @@ fun TribusScreen(evento: Evento, onVolver: () -> Unit, onUnirse: (Tribu) -> Unit
                             .shadow(16.dp, CircleShape, spotColor = Naranja, ambientColor = Naranja)
                             .clip(CircleShape)
                             .background(Naranja)
-                            .clickable { onUnirse(tribu) },
+                            .clickable {
+                                if (viewModel.unirse(usuario)) {
+                                    onUnirse(tribu)
+                                } else {
+                                    Toast.makeText(context, "Esta tribu ya está llena", Toast.LENGTH_SHORT).show()
+                                }
+                            },
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -202,7 +214,7 @@ fun TribusScreen(evento: Evento, onVolver: () -> Unit, onUnirse: (Tribu) -> Unit
                 }
             }
         } else {
-            SinMasTribus(onVolverAEmpezar = { indice = 0 }, onVolver = onVolver)
+            SinMasTribus(onVolverAEmpezar = viewModel::verDeNuevo, onVolver = onVolver)
         }
     }
 }
@@ -420,6 +432,6 @@ fun SinMasTribus(onVolverAEmpezar: () -> Unit, onVolver: () -> Unit) {
 @Composable
 fun TribusPreview() {
     MygosTheme {
-        TribusScreen(evento = EventoRepository.obtenerEventos()[0], onVolver = {}, onUnirse = {})
+        TribusScreen(evento = EventoRepository.obtenerEventos()[0], usuario = valeM, onVolver = {}, onUnirse = {})
     }
 }

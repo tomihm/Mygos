@@ -67,6 +67,7 @@ class MainActivity : ComponentActivity() {
                     )
                     pantalla == "tribus" -> TribusScreen(
                         evento = evento,
+                        usuario = actual,
                         onVolver = { pantalla = "evento" },
                         onUnirse = {
                             Toast.makeText(context, "Te uniste a ${it.nombre}", Toast.LENGTH_SHORT).show()
