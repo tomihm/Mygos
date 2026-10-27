@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import com.example.mygos.repository.EventoRepository
 import com.example.mygos.ui.theme.MygosTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,7 +27,7 @@ class MainActivity : ComponentActivity() {
             MygosTheme {
                 var pantalla by remember { mutableStateOf("bienvenida") }
                 var usuario by remember { mutableStateOf<Usuario?>(null) }
-                var evento by remember { mutableStateOf(eventos[0]) }
+                var evento by remember { mutableStateOf(EventoRepository.obtenerEventos()[0]) }
                 val context = LocalContext.current
 
                 BackHandler(enabled = pantalla != "bienvenida") {

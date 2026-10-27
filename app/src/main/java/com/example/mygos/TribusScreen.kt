@@ -55,6 +55,7 @@ import com.example.mygos.ui.theme.Amarillo
 import com.example.mygos.ui.theme.Azul
 import com.example.mygos.ui.theme.BotonOscuro
 import com.example.mygos.ui.theme.Fondo
+import com.example.mygos.repository.EventoRepository
 import com.example.mygos.ui.theme.MygosTheme
 import com.example.mygos.ui.theme.Naranja
 import com.example.mygos.ui.theme.Nunito
@@ -419,6 +420,6 @@ fun SinMasTribus(onVolverAEmpezar: () -> Unit, onVolver: () -> Unit) {
 @Composable
 fun TribusPreview() {
     MygosTheme {
-        TribusScreen(evento = eventos[0], onVolver = {}, onUnirse = {})
+        TribusScreen(evento = EventoRepository.obtenerEventos()[0], onVolver = {}, onUnirse = {})
     }
 }

@@ -34,10 +34,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,6 +51,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mygos.ui.theme.Amarillo
 import com.example.mygos.ui.theme.Fondo
 import com.example.mygos.ui.theme.IconoGris
@@ -66,16 +65,15 @@ import com.example.mygos.ui.theme.TextoGris
 import com.example.mygos.ui.theme.TextoSuave
 import com.example.mygos.ui.theme.TextoTarjeta
 import com.example.mygos.ui.theme.Verde
+import com.example.mygos.viewmodel.ExplorarViewModel
 
 @Composable
-fun ExplorarScreen(usuario: Usuario, onVerEvento: (Evento) -> Unit) {
-    var categoria by remember { mutableStateOf("Todos") }
-
-    val eventosFiltrados = if (categoria == "Todos") {
-        eventos
-    } else {
-        eventos.filter { it.categoria == categoria }
-    }
+fun ExplorarScreen(
+    usuario: Usuario,
+    onVerEvento: (Evento) -> Unit,
+    viewModel: ExplorarViewModel = viewModel()
+) {
+    val estado by viewModel.estado.collectAsState()
 
     Column(
         modifier = Modifier
@@ -94,11 +92,12 @@ fun ExplorarScreen(usuario: Usuario, onVerEvento: (Evento) -> Unit) {
             }
             item {
                 Filtros(
-                    seleccionada = categoria,
-                    onSeleccionar = { categoria = it }
+                    categorias = estado.categorias,
+                    seleccionada = estado.categoria,
+                    onSeleccionar = viewModel::elegirCategoria
                 )
             }
-            items(eventosFiltrados) { evento ->
+            items(estado.eventos) { evento ->
                 TarjetaEvento(evento, onClick = { onVerEvento(evento) })
             }
         }
@@ -148,7 +147,7 @@ fun Encabezado(usuario: Usuario) {
 }
 
 @Composable
-fun Filtros(seleccionada: String, onSeleccionar: (String) -> Unit) {
+fun Filtros(categorias: List<String>, seleccionada: String, onSeleccionar: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

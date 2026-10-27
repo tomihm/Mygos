@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mygos.ui.theme.Amarillo
 import com.example.mygos.ui.theme.Fondo
+import com.example.mygos.repository.EventoRepository
 import com.example.mygos.ui.theme.MygosTheme
 import com.example.mygos.ui.theme.Naranja
 import com.example.mygos.ui.theme.Nunito
@@ -278,6 +279,6 @@ fun TextosInfo(titulo: String, detalle: String) {
 @Composable
 fun EventoPreview() {
     MygosTheme {
-        EventoScreen(evento = eventos[0], onVolver = {}, onBuscarTribu = {})
+        EventoScreen(evento = EventoRepository.obtenerEventos()[0], onVolver = {}, onBuscarTribu = {})
     }
 }
