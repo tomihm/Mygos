@@ -18,6 +18,7 @@ object EventoRepository {
 
     private val eventos = listOf(
         Evento(
+            id = 1,
             titulo = "Festival de Jazz en el Parque",
             organizador = productoraSonora,
             hora = "17:00", mes = "HOY", dia = "24",
@@ -34,6 +35,7 @@ object EventoRepository {
             buscanGrupo = 18
         ),
         Evento(
+            id = 2,
             titulo = "Cine bajo las estrellas",
             organizador = cineclubNorte,
             hora = "20:30", mes = "OCT", dia = "26",
@@ -50,6 +52,7 @@ object EventoRepository {
             buscanGrupo = 7
         ),
         Evento(
+            id = 3,
             titulo = "Noche de juegos de mesa",
             organizador = ludotecaCentral,
             hora = "19:00", mes = "NOV", dia = "03",
@@ -66,6 +69,7 @@ object EventoRepository {
             buscanGrupo = 6
         ),
         Evento(
+            id = 4,
             titulo = "Escucha de vinilos",
             organizador = productoraSonora,
             hora = "20:00", mes = "NOV", dia = "07",
@@ -86,6 +90,8 @@ object EventoRepository {
     fun obtenerCategorias(): List<String> = categorias
 
     fun obtenerEventos(): List<Evento> = eventos
+
+    fun buscarEvento(id: Int): Evento? = eventos.find { it.id == id }
 
     fun eventosDeCategoria(categoria: String): List<Evento> {
         if (categoria == "Todos") return eventos

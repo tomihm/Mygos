@@ -52,7 +52,7 @@ import com.example.mygos.viewmodel.InicioSesionViewModel
 @Composable
 fun InicioSesionScreen(
     onVolver: () -> Unit,
-    onEntrar: (Usuario) -> Unit,
+    onEntrar: () -> Unit,
     onIrACrearCuenta: () -> Unit,
     viewModel: InicioSesionViewModel = viewModel()
 ) {
@@ -104,8 +104,7 @@ fun InicioSesionScreen(
         BotonNaranja(
             texto = "Entrar",
             onClick = {
-                val usuario = viewModel.iniciarSesion()
-                if (usuario != null) onEntrar(usuario)
+                if (viewModel.iniciarSesion() != null) onEntrar()
             }
         )
 
@@ -138,7 +137,7 @@ fun InicioSesionScreen(
 @Composable
 fun CrearCuentaScreen(
     onVolver: () -> Unit,
-    onCuentaCreada: (Usuario) -> Unit,
+    onCuentaCreada: () -> Unit,
     onIrAIniciarSesion: () -> Unit,
     viewModel: CrearCuentaViewModel = viewModel()
 ) {
@@ -198,8 +197,7 @@ fun CrearCuentaScreen(
         BotonNaranja(
             texto = "Crear cuenta",
             onClick = {
-                val usuario = viewModel.crearCuenta()
-                if (usuario != null) onCuentaCreada(usuario)
+                if (viewModel.crearCuenta() != null) onCuentaCreada()
             }
         )
 

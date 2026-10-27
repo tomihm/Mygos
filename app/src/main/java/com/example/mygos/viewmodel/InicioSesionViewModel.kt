@@ -41,7 +41,7 @@ class InicioSesionViewModel : ViewModel() {
             _estado.update { it.copy(error = "Completa tu correo y contraseña") }
             return null
         }
-        val usuario = CuentaRepository.buscarCuenta(actual.correo, actual.clave)
+        val usuario = CuentaRepository.iniciarSesion(actual.correo, actual.clave)
         if (usuario == null) {
             _estado.update { it.copy(error = "Correo o contraseña incorrectos") }
         }

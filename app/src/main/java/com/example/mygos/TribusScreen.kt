@@ -72,8 +72,7 @@ fun TribusScreen(
     usuario: Usuario,
     onVolver: () -> Unit,
     onUnirse: (Tribu) -> Unit,
-    // key: un ViewModel distinto por evento, asi no se mezcla el avance entre eventos
-    viewModel: TribusViewModel = viewModel(key = evento.titulo) { TribusViewModel(evento) }
+    viewModel: TribusViewModel = viewModel { TribusViewModel(evento) }
 ) {
     val context = LocalContext.current
     val estado by viewModel.estado.collectAsState()

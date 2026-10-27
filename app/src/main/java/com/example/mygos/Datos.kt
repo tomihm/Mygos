@@ -16,6 +16,7 @@ data class Usuario(val nombre: String, val iniciales: String, val color: Color)
 data class Cuenta(val correo: String, val clave: String, val usuario: Usuario)
 
 data class Evento(
+    val id: Int,
     val titulo: String,
     val organizador: Usuario,
     val hora: String,
