@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 data class TribusEstado(
     val evento: Evento? = null,
@@ -48,12 +47,10 @@ class TribusViewModel(eventoId: Int) : ViewModel() {
 
     fun unirse(usuario: Usuario) {
         val tribu = estado.value.tribuActual ?: return
-        viewModelScope.launch {
-            if (TribuRepository.unirse(tribu, usuario)) {
-                local.update { it.copy(unidoA = tribu) }
-            } else {
-                local.update { it.copy(error = "Esta tribu ya está llena") }
-            }
+        if (TribuRepository.unirse(tribu, usuario)) {
+            local.update { it.copy(unidoA = tribu) }
+        } else {
+            local.update { it.copy(error = "Esta tribu ya está llena") }
         }
     }
 

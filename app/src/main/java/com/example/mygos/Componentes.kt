@@ -75,7 +75,6 @@ fun Avatar(
     }
 }
 
-// Lineas diagonales blancas suaves que usa el diseño en las fotos de ejemplo
 fun Modifier.rayas(): Modifier = this.drawBehind {
     val paso = 17.dp.toPx()
     var x = -size.height

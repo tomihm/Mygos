@@ -90,7 +90,7 @@ fun TribusRuta(
         }
     }
 
-    // mientras Room carga el evento no se dibuja nada
+    // mientras el evento no llega no se dibuja nada
     val evento = estado.evento
     if (evento != null) {
         TribusScreen(

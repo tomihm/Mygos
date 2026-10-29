@@ -1,6 +1,5 @@
 package com.example.mygos.data
 
-import androidx.room.withTransaction
 import com.example.mygos.Cuenta
 import com.example.mygos.Evento
 import com.example.mygos.R
@@ -17,13 +16,8 @@ import com.example.mygos.rodriF
 import com.example.mygos.sofiB
 import com.example.mygos.valeM
 
-// Datos de ejemplo que se guardan en la base de datos la primera vez que se abre la app.
-// Las previews de las pantallas tambien los usan
-
-val usuariosIniciales = listOf(
-    valeM, nicoT, camiR, anaL, sofiB, rodriF, daniK, juanP,
-    productoraSonora, cineclubNorte, ludotecaCentral
-)
+// Datos de ejemplo. Las cuentas se guardan en Room la primera vez que se abre la app,
+// los eventos y tribus se quedan en memoria. Las previews de las pantallas tambien los usan
 
 val cuentasIniciales = listOf(
     Cuenta("vale@mygos.cl", "1234", valeM),
@@ -135,20 +129,9 @@ val tribusIniciales = listOf(
     )
 )
 
+// Guarda las cuentas de prueba solo si la tabla esta vacia (primera vez que se abre la app)
 suspend fun precargar(db: MygosDatabase) {
-    if (db.cuentaDao().contarUsuarios() > 0) return
-
-    // withTransaction: se guarda todo junto o nada
-    db.withTransaction {
-        db.cuentaDao().insertarUsuarios(usuariosIniciales.map { it.aEntidad() })
-        db.cuentaDao().insertarCuentas(cuentasIniciales.map { CuentaEntity(it.correo, it.clave, it.usuario.id) })
-        db.eventoDao().insertarEventos(eventosIniciales.map { it.aEntidad() })
-        db.eventoDao().insertarAsistentes(
-            eventosIniciales.flatMap { evento -> evento.asistentes.map { EventoAsistenteRef(evento.id, it.id) } }
-        )
-        db.tribuDao().insertarTribus(tribusIniciales.map { it.aEntidad() })
-        db.tribuDao().insertarIntegrantes(
-            tribusIniciales.flatMap { tribu -> tribu.integrantes.map { TribuIntegranteRef(tribu.id, it.id) } }
-        )
-    }
+    val dao = db.cuentaDao()
+    if (dao.contarCuentas() > 0) return
+    dao.insertarCuentas(cuentasIniciales.map { it.aEntidad() })
 }

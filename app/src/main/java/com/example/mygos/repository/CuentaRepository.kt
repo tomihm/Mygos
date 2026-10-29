@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.toArgb
 import com.example.mygos.Cuenta
 import com.example.mygos.Usuario
 import com.example.mygos.data.CuentaDao
-import com.example.mygos.data.UsuarioEntity
+import com.example.mygos.data.CuentaEntity
 import com.example.mygos.data.aModelo
 import com.example.mygos.ui.theme.AzulGris
 import com.example.mygos.ui.theme.Dorado
@@ -36,7 +36,7 @@ object CuentaRepository {
 
     suspend fun iniciarSesion(correo: String, clave: String): Usuario? {
         val cuenta = dao.buscar(correo.trim().lowercase())
-        usuarioActual = if (cuenta != null && cuenta.cuenta.clave == clave) cuenta.usuario.aModelo() else null
+        usuarioActual = if (cuenta != null && cuenta.clave == clave) cuenta.aModelo().usuario else null
         return usuarioActual
     }
 
@@ -52,9 +52,15 @@ object CuentaRepository {
             palabras[0].take(2)
         }
         val color = coloresNuevos[dao.contarCuentas() % coloresNuevos.size]
-        val nuevo = UsuarioEntity(nombre = nombre.trim(), iniciales = iniciales.uppercase(), color = color.toArgb())
-        val id = dao.crear(nuevo, correo.trim().lowercase(), clave)
-        val usuario = nuevo.copy(id = id).aModelo()
+        val nueva = CuentaEntity(
+            correo = correo.trim().lowercase(),
+            clave = clave,
+            nombre = nombre.trim(),
+            iniciales = iniciales.uppercase(),
+            color = color.toArgb()
+        )
+        val id = dao.insertar(nueva).toInt()
+        val usuario = nueva.copy(id = id).aModelo().usuario
         usuarioActual = usuario
         return usuario
     }

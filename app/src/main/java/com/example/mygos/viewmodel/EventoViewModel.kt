@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.stateIn
 
 class EventoViewModel(eventoId: Int) : ViewModel() {
 
-    // null mientras Room todavia no responde
+    // null mientras el evento todavia no llega
     val evento: StateFlow<Evento?> = EventoRepository.evento(eventoId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 }

@@ -5,8 +5,6 @@ import androidx.room.Room
 import com.example.mygos.data.MygosDatabase
 import com.example.mygos.data.precargar
 import com.example.mygos.repository.CuentaRepository
-import com.example.mygos.repository.EventoRepository
-import com.example.mygos.repository.TribuRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,8 +21,6 @@ class MygosApp : Application() {
         val db = Room.databaseBuilder(this, MygosDatabase::class.java, "mygos.db").build()
 
         CuentaRepository.iniciar(db.cuentaDao())
-        EventoRepository.iniciar(db.eventoDao())
-        TribuRepository.iniciar(db.tribuDao())
 
         scope.launch { precargar(db) }
     }

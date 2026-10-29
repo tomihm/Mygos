@@ -64,7 +64,7 @@ fun EventoRuta(
     viewModel: EventoViewModel = viewModel { EventoViewModel(eventoId) }
 ) {
     val evento by viewModel.evento.collectAsState()
-    // mientras Room carga el evento no se dibuja nada
+    // mientras el evento no llega no se dibuja nada
     evento?.let { EventoScreen(it, onVolver, onBuscarTribu) }
 }
 
