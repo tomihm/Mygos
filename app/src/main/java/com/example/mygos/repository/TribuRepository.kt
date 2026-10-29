@@ -20,6 +20,15 @@ object TribuRepository {
         return tribus.map { lista -> lista.filter { it.eventoId == eventoId } }
     }
 
+    fun tribu(id: Int): Flow<Tribu?> {
+        return tribus.map { lista -> lista.find { it.id == id } }
+    }
+
+    // Las tribus donde el usuario es integrante, para "Mis tribus"
+    fun misTribus(usuarioId: Int): Flow<List<Tribu>> {
+        return tribus.map { lista -> lista.filter { tribu -> tribu.integrantes.any { it.id == usuarioId } } }
+    }
+
     // Cambia la tribu en la lista por una copia que incluye al usuario.
     // Devuelve false si la tribu ya no tiene cupos
     fun unirse(tribu: Tribu, usuario: Usuario): Boolean {
@@ -30,5 +39,14 @@ object TribuRepository {
             lista.map { if (it.id == tribu.id) it.copy(integrantes = it.integrantes + usuario) else it }
         }
         return true
+    }
+
+    // Saca al usuario de la tribu y su cupo queda libre para otra persona
+    fun salir(tribu: Tribu, usuario: Usuario) {
+        _tribus.update { lista ->
+            lista.map { actual ->
+                if (actual.id == tribu.id) actual.copy(integrantes = actual.integrantes.filter { it.id != usuario.id }) else actual
+            }
+        }
     }
 }
