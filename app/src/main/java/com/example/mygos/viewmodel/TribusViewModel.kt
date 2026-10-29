@@ -54,6 +54,11 @@ class TribusViewModel(eventoId: Int) : ViewModel() {
         }
     }
 
+    // Se llama despues de navegar, para que al volver atras no se navegue otra vez
+    fun unionMostrada() {
+        local.update { it.copy(unidoA = null) }
+    }
+
     fun errorMostrado() {
         local.update { it.copy(error = "") }
     }

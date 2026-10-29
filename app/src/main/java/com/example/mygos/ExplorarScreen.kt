@@ -73,14 +73,16 @@ import com.example.mygos.viewmodel.ExplorarViewModel
 fun ExplorarRuta(
     usuario: Usuario,
     onVerEvento: (Evento) -> Unit,
-    viewModel: ExplorarViewModel = viewModel()
+    onIrASeccion: (Seccion) -> Unit,
+    viewModel: ExplorarViewModel = viewModel { ExplorarViewModel(usuario.id) }
 ) {
     val estado by viewModel.estado.collectAsState()
     ExplorarScreen(
         usuario = usuario,
         estado = estado,
         onElegirCategoria = viewModel::elegirCategoria,
-        onVerEvento = onVerEvento
+        onVerEvento = onVerEvento,
+        onIrASeccion = onIrASeccion
     )
 }
 
@@ -89,7 +91,8 @@ fun ExplorarScreen(
     usuario: Usuario,
     estado: ExplorarEstado,
     onElegirCategoria: (String) -> Unit,
-    onVerEvento: (Evento) -> Unit
+    onVerEvento: (Evento) -> Unit,
+    onIrASeccion: (Seccion) -> Unit
 ) {
 
     Column(
@@ -118,7 +121,7 @@ fun ExplorarScreen(
                 TarjetaEvento(evento, onClick = { onVerEvento(evento) })
             }
         }
-        BarraInferior()
+        BarraInferior(actual = Seccion.EVENTOS, misTribus = estado.misTribus, onIr = onIrASeccion)
     }
 }
 
@@ -352,8 +355,11 @@ fun TarjetaEvento(evento: Evento, onClick: () -> Unit) {
     }
 }
 
+enum class Seccion { EVENTOS, TRIBUS, PERFIL }
+
+// Barra de abajo que comparten Explorar y Mis tribus. El aviso naranja cuenta las tribus del usuario
 @Composable
-fun BarraInferior() {
+fun BarraInferior(actual: Seccion, misTribus: Int, onIr: (Seccion) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -367,18 +373,21 @@ fun BarraInferior() {
                 .padding(start = 45.dp, end = 45.dp, top = 10.dp, bottom = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            ItemBarra(Icons.Filled.LocalActivity, "Eventos", activo = true)
-            ItemBarra(Icons.Outlined.Groups, "Tribus", activo = false, aviso = 2)
-            ItemBarra(Icons.Outlined.Person, "Perfil", activo = false)
+            ItemBarra(Icons.Filled.LocalActivity, "Eventos", activo = actual == Seccion.EVENTOS, onClick = { onIr(Seccion.EVENTOS) })
+            ItemBarra(Icons.Outlined.Groups, "Tribus", activo = actual == Seccion.TRIBUS, aviso = misTribus, onClick = { onIr(Seccion.TRIBUS) })
+            ItemBarra(Icons.Outlined.Person, "Perfil", activo = actual == Seccion.PERFIL, onClick = { onIr(Seccion.PERFIL) })
         }
     }
 }
 
 @Composable
-fun ItemBarra(icono: ImageVector, texto: String, activo: Boolean, aviso: Int = 0) {
+fun ItemBarra(icono: ImageVector, texto: String, activo: Boolean, onClick: () -> Unit, aviso: Int = 0) {
     val color = if (activo) Naranja else IconoGris
     Column(
-        modifier = Modifier.width(72.dp),
+        modifier = Modifier
+            .width(72.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box {
@@ -428,7 +437,8 @@ fun ExplorarPreview() {
             usuario = valeM,
             estado = ExplorarEstado(eventos = eventosIniciales),
             onElegirCategoria = {},
-            onVerEvento = {}
+            onVerEvento = {},
+            onIrASeccion = {}
         )
     }
 }
