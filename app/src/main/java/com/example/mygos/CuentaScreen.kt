@@ -20,6 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -121,13 +124,17 @@ fun InicioSesionScreen(
             valor = estado.correo,
             onCambio = onCambiarCorreo,
             etiqueta = "Correo",
+            icono = Icons.Filled.Email,
+            error = estado.errorCorreo,
             tipo = KeyboardType.Email
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         CampoTexto(
             valor = estado.clave,
             onCambio = onCambiarClave,
             etiqueta = "Contraseña",
+            icono = Icons.Filled.Lock,
+            error = estado.errorClave,
             tipo = KeyboardType.Password,
             esClave = true
         )
@@ -229,29 +236,30 @@ fun CrearCuentaScreen(
         CampoTexto(
             valor = estado.nombre,
             onCambio = onCambiarNombre,
-            etiqueta = "Nombre de usuario"
+            etiqueta = "Nombre de usuario",
+            icono = Icons.Filled.Person,
+            error = estado.errorNombre
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         CampoTexto(
             valor = estado.correo,
             onCambio = onCambiarCorreo,
             etiqueta = "Correo",
+            icono = Icons.Filled.Email,
+            error = estado.errorCorreo,
             tipo = KeyboardType.Email
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         CampoTexto(
             valor = estado.clave,
             onCambio = onCambiarClave,
             etiqueta = "Contraseña",
+            icono = Icons.Filled.Lock,
+            error = estado.errorClave,
+            ayuda = "Mínimo 4 caracteres",
             tipo = KeyboardType.Password,
             esClave = true
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        if (estado.error.isNotEmpty()) {
-            Text(text = estado.error, color = Naranja, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        } else {
-            Text(text = "Mínimo 4 caracteres", color = TextoGris, fontFamily = Nunito, fontSize = 13.sp)
-        }
 
         Spacer(modifier = Modifier.height(20.dp))
         BotonNaranja(

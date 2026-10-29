@@ -12,13 +12,22 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +46,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mygos.ui.theme.BotonOscuro
+import com.example.mygos.ui.theme.IconoGris
 import com.example.mygos.ui.theme.Naranja
 import com.example.mygos.ui.theme.Nunito
 import com.example.mygos.ui.theme.Tarjeta
@@ -150,34 +160,78 @@ fun BotonNaranja(
     }
 }
 
+// Campo del formulario. Si llega un error, el borde y el mensaje se pintan de naranja y aparece el icono de alerta.
+// La ayuda es un texto gris que se muestra mientras no hay error
 @Composable
 fun CampoTexto(
     valor: String,
     onCambio: (String) -> Unit,
     etiqueta: String,
+    icono: ImageVector,
     modifier: Modifier = Modifier,
+    error: String = "",
+    ayuda: String = "",
     tipo: KeyboardType = KeyboardType.Text,
     esClave: Boolean = false
 ) {
+    var claveVisible by remember { mutableStateOf(false) }
+    val hayError = error.isNotEmpty()
+    val textoAbajo = if (hayError) error else ayuda
+
     OutlinedTextField(
         value = valor,
         onValueChange = onCambio,
         label = { Text(etiqueta, fontFamily = Nunito) },
+        leadingIcon = { Icon(imageVector = icono, contentDescription = null) },
+        trailingIcon = when {
+            esClave -> {
+                {
+                    IconButton(onClick = { claveVisible = !claveVisible }) {
+                        Icon(
+                            imageVector = if (claveVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                            contentDescription = if (claveVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                        )
+                    }
+                }
+            }
+            hayError -> {
+                { Icon(imageVector = Icons.Filled.ErrorOutline, contentDescription = null) }
+            }
+            else -> null
+        },
+        isError = hayError,
+        supportingText = if (textoAbajo.isNotEmpty()) {
+            { Text(textoAbajo, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
+        } else null,
         singleLine = true,
         shape = RoundedCornerShape(14.dp),
         textStyle = TextStyle(fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 15.sp),
         keyboardOptions = KeyboardOptions(keyboardType = tipo),
-        visualTransformation = if (esClave) PasswordVisualTransformation() else VisualTransformation.None,
+        visualTransformation = if (esClave && !claveVisible) PasswordVisualTransformation() else VisualTransformation.None,
         colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = TextoClaro,
             unfocusedTextColor = TextoClaro,
+            errorTextColor = TextoClaro,
             focusedContainerColor = Tarjeta,
             unfocusedContainerColor = Tarjeta,
+            errorContainerColor = Tarjeta,
             focusedBorderColor = Naranja,
             unfocusedBorderColor = Color.White.copy(alpha = 0.08f),
+            errorBorderColor = Naranja,
             focusedLabelColor = Naranja,
             unfocusedLabelColor = TextoGris,
-            cursorColor = Naranja
+            errorLabelColor = Naranja,
+            focusedLeadingIconColor = Naranja,
+            unfocusedLeadingIconColor = IconoGris,
+            errorLeadingIconColor = Naranja,
+            focusedTrailingIconColor = IconoGris,
+            unfocusedTrailingIconColor = IconoGris,
+            errorTrailingIconColor = Naranja,
+            focusedSupportingTextColor = TextoGris,
+            unfocusedSupportingTextColor = TextoGris,
+            errorSupportingTextColor = Naranja,
+            cursorColor = Naranja,
+            errorCursorColor = Naranja
         ),
         modifier = modifier.fillMaxWidth()
     )
