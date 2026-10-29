@@ -1,5 +1,6 @@
 package com.example.mygos.navegacion
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,8 +16,12 @@ import com.example.mygos.CrearCuentaRuta
 import com.example.mygos.EventoRuta
 import com.example.mygos.ExplorarRuta
 import com.example.mygos.InicioSesionRuta
+import com.example.mygos.MisTribusRuta
+import com.example.mygos.Seccion
+import com.example.mygos.TribuDetalleRuta
 import com.example.mygos.TribusRuta
 import com.example.mygos.Usuario
+import com.example.mygos.YaTienesTribuRuta
 import com.example.mygos.repository.CuentaRepository
 
 object Rutas {
@@ -26,9 +31,14 @@ object Rutas {
     const val EXPLORAR = "explorar"
     const val EVENTO = "evento/{eventoId}"
     const val TRIBUS = "tribus/{eventoId}"
+    const val TRIBU = "tribu/{tribuId}"
+    const val YA_TIENES_TRIBU = "ya_tienes_tribu/{tribuId}"
+    const val MIS_TRIBUS = "mis_tribus"
 
     fun evento(id: Int) = "evento/$id"
     fun tribus(id: Int) = "tribus/$id"
+    fun tribu(id: Int) = "tribu/$id"
+    fun yaTienesTribu(id: Int) = "ya_tienes_tribu/$id"
 }
 
 @Composable
@@ -72,7 +82,8 @@ fun MygosNavHost(navController: NavHostController = rememberNavController()) {
             ConSesion(navController) { usuario ->
                 ExplorarRuta(
                     usuario = usuario,
-                    onVerEvento = { navController.navigate(Rutas.evento(it.id)) }
+                    onVerEvento = { navController.navigate(Rutas.evento(it.id)) },
+                    onIrASeccion = { irASeccion(navController, it, context) }
                 )
             }
         }
@@ -99,10 +110,53 @@ fun MygosNavHost(navController: NavHostController = rememberNavController()) {
                     eventoId = id,
                     usuario = usuario,
                     onVolver = { navController.popBackStack() },
-                    onUnirse = {
-                        Toast.makeText(context, "Te uniste a ${it.nombre}", Toast.LENGTH_SHORT).show()
-                        navController.popBackStack(Rutas.EXPLORAR, inclusive = false)
+                    onUnirse = { navController.navigate(Rutas.yaTienesTribu(it.id)) },
+                    onVerTribu = { navController.navigate(Rutas.tribu(it.id)) }
+                )
+            }
+        }
+
+        composable(
+            route = Rutas.TRIBU,
+            arguments = listOf(navArgument("tribuId") { type = NavType.IntType })
+        ) { entrada ->
+            val id = entrada.arguments?.getInt("tribuId") ?: 0
+            ConSesion(navController) { usuario ->
+                TribuDetalleRuta(
+                    tribuId = id,
+                    usuario = usuario,
+                    onVolver = { navController.popBackStack() },
+                    onUnido = { navController.navigate(Rutas.yaTienesTribu(it.id)) }
+                )
+            }
+        }
+
+        composable(
+            route = Rutas.YA_TIENES_TRIBU,
+            arguments = listOf(navArgument("tribuId") { type = NavType.IntType })
+        ) { entrada ->
+            val id = entrada.arguments?.getInt("tribuId") ?: 0
+            ConSesion(navController) { usuario ->
+                YaTienesTribuRuta(
+                    tribuId = id,
+                    usuario = usuario,
+                    onVerMisTribus = { irASeccion(navController, Seccion.TRIBUS, context) },
+                    onVerOtrasTribus = {
+                        // vuelve al carrusel de tribus del evento; si no se llego desde ahi, solo vuelve atras
+                        if (!navController.popBackStack(Rutas.TRIBUS, inclusive = false)) {
+                            navController.popBackStack()
+                        }
                     }
+                )
+            }
+        }
+
+        composable(Rutas.MIS_TRIBUS) {
+            ConSesion(navController) { usuario ->
+                MisTribusRuta(
+                    usuario = usuario,
+                    onVerTribu = { navController.navigate(Rutas.tribu(it.id)) },
+                    onIrASeccion = { irASeccion(navController, it, context) }
                 )
             }
         }
@@ -113,6 +167,22 @@ fun MygosNavHost(navController: NavHostController = rememberNavController()) {
 private fun irAExplorar(navController: NavHostController) {
     navController.navigate(Rutas.EXPLORAR) {
         popUpTo(Rutas.BIENVENIDA) { inclusive = true }
+    }
+}
+
+// Explorar queda siempre al fondo de la pila: desde Mis tribus, "atras" vuelve a Explorar.
+// launchSingleTop evita apilar la misma pantalla dos veces si se toca otra vez
+private fun irASeccion(navController: NavHostController, seccion: Seccion, context: Context) {
+    when (seccion) {
+        Seccion.EVENTOS -> navController.navigate(Rutas.EXPLORAR) {
+            popUpTo(Rutas.EXPLORAR) { inclusive = true }
+            launchSingleTop = true
+        }
+        Seccion.TRIBUS -> navController.navigate(Rutas.MIS_TRIBUS) {
+            popUpTo(Rutas.EXPLORAR)
+            launchSingleTop = true
+        }
+        Seccion.PERFIL -> Toast.makeText(context, "Próximamente", Toast.LENGTH_SHORT).show()
     }
 }
 

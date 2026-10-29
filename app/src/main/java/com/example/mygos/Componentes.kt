@@ -3,7 +3,9 @@ package com.example.mygos
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -157,6 +159,37 @@ fun BotonNaranja(
             fontWeight = FontWeight.ExtraBold,
             fontSize = 16.sp
         )
+    }
+}
+
+// Boton secundario: solo borde, sin relleno
+@Composable
+fun BotonContorno(
+    texto: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icono: ImageVector? = null,
+    colorTexto: Color = TextoClaro,
+    colorBorde: Color = Color.White.copy(alpha = 0.15f),
+    fondo: Color = Color.Transparent
+) {
+    val forma = RoundedCornerShape(18.dp)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .clip(forma)
+            .background(fondo)
+            .border(1.dp, colorBorde, forma)
+            .clickable { onClick() },
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (icono != null) {
+            Icon(imageVector = icono, contentDescription = null, tint = colorTexto, modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+        Text(text = texto, color = colorTexto, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
     }
 }
 

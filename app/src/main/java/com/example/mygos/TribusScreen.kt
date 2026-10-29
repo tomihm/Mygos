@@ -75,13 +75,17 @@ fun TribusRuta(
     usuario: Usuario,
     onVolver: () -> Unit,
     onUnirse: (Tribu) -> Unit,
+    onVerTribu: (Tribu) -> Unit,
     viewModel: TribusViewModel = viewModel { TribusViewModel(eventoId) }
 ) {
     val context = LocalContext.current
     val estado by viewModel.estado.collectAsState()
 
     LaunchedEffect(estado.unidoA) {
-        estado.unidoA?.let(onUnirse)
+        estado.unidoA?.let {
+            onUnirse(it)
+            viewModel.unionMostrada()
+        }
     }
     LaunchedEffect(estado.error) {
         if (estado.error.isNotEmpty()) {
@@ -99,7 +103,8 @@ fun TribusRuta(
             onSaltar = viewModel::saltar,
             onUnirme = { viewModel.unirse(usuario) },
             onVerDeNuevo = viewModel::verDeNuevo,
-            onVolver = onVolver
+            onVolver = onVolver,
+            onVerTribu = onVerTribu
         )
     }
 }
@@ -111,7 +116,8 @@ fun TribusScreen(
     onSaltar: () -> Unit,
     onUnirme: () -> Unit,
     onVerDeNuevo: () -> Unit,
-    onVolver: () -> Unit
+    onVolver: () -> Unit,
+    onVerTribu: (Tribu) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -186,10 +192,7 @@ fun TribusScreen(
             ) {
                 TarjetaTribu(
                     tribu = tribu,
-                    onInfo = {
-                        val nombres = tribu.integrantes.joinToString(", ") { it.nombre }
-                        Toast.makeText(context, "Integrantes: $nombres", Toast.LENGTH_LONG).show()
-                    },
+                    onInfo = { onVerTribu(tribu) },
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(start = 14.dp, end = 14.dp, bottom = 44.dp)
@@ -262,41 +265,8 @@ fun TarjetaTribu(tribu: Tribu, onInfo: () -> Unit, modifier: Modifier = Modifier
             .background(Tarjeta)
     ) {
         Box {
-            // se muestran hasta 4 integrantes, si faltan queda un cupo libre
-            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                for (fila in 0..1) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                        for (columna in 0..1) {
-                            val persona = tribu.integrantes.getOrNull(fila * 2 + columna)
-                            CuadroIntegrante(persona, Modifier.weight(1f))
-                        }
-                    }
-                }
-            }
-            Row(
-                modifier = Modifier
-                    .padding(14.dp)
-                    .height(33.dp)
-                    .clip(CircleShape)
-                    .background(Amarillo)
-                    .padding(horizontal = 11.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Bolt,
-                    contentDescription = null,
-                    tint = Fondo,
-                    modifier = Modifier.size(17.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "${tribu.afinidad}% afinidad",
-                    color = Fondo,
-                    fontFamily = Nunito,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 13.sp
-                )
-            }
+            GrillaIntegrantes(tribu.integrantes)
+            ChipAfinidad("${tribu.afinidad}% afinidad", Modifier.padding(14.dp))
             Row(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -364,23 +334,7 @@ fun TarjetaTribu(tribu: Tribu, onInfo: () -> Unit, modifier: Modifier = Modifier
             Spacer(modifier = Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 for (interes in tribu.intereses) {
-                    Box(
-                        modifier = Modifier
-                            .height(26.dp)
-                            .clip(CircleShape)
-                            .background(Naranja.copy(alpha = 0.22f))
-                            .border(1.dp, Naranja, CircleShape)
-                            .padding(horizontal = 11.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = interes,
-                            color = TextoClaro,
-                            fontFamily = Nunito,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 12.sp
-                        )
-                    }
+                    ChipInteres(interes)
                 }
             }
             Spacer(modifier = Modifier.height(14.dp))
@@ -403,8 +357,71 @@ fun TarjetaTribu(tribu: Tribu, onInfo: () -> Unit, modifier: Modifier = Modifier
     }
 }
 
+// Se muestran hasta 4 integrantes; si faltan, el cuadro queda como cupo libre
 @Composable
-fun CuadroIntegrante(persona: Usuario?, modifier: Modifier = Modifier) {
+fun GrillaIntegrantes(integrantes: List<Usuario>, modifier: Modifier = Modifier, conNombres: Boolean = true) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        for (fila in 0..1) {
+            Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                for (columna in 0..1) {
+                    val persona = integrantes.getOrNull(fila * 2 + columna)
+                    CuadroIntegrante(persona, Modifier.weight(1f), conNombre = conNombres)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ChipAfinidad(texto: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .height(33.dp)
+            .clip(CircleShape)
+            .background(Amarillo)
+            .padding(horizontal = 11.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Bolt,
+            contentDescription = null,
+            tint = Fondo,
+            modifier = Modifier.size(17.dp)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = texto,
+            color = Fondo,
+            fontFamily = Nunito,
+            fontWeight = FontWeight.Black,
+            fontSize = 13.sp
+        )
+    }
+}
+
+@Composable
+fun ChipInteres(texto: String) {
+    Box(
+        modifier = Modifier
+            .height(26.dp)
+            .clip(CircleShape)
+            .background(Naranja.copy(alpha = 0.22f))
+            .border(1.dp, Naranja, CircleShape)
+            .padding(horizontal = 11.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = texto,
+            color = TextoClaro,
+            fontFamily = Nunito,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 12.sp
+        )
+    }
+}
+
+@Composable
+fun CuadroIntegrante(persona: Usuario?, modifier: Modifier = Modifier, conNombre: Boolean = true) {
     val fondo = persona?.color ?: BotonOscuro
     Box(
         modifier = modifier
@@ -413,17 +430,19 @@ fun CuadroIntegrante(persona: Usuario?, modifier: Modifier = Modifier) {
             .rayas()
             .background(Brush.verticalGradient(0.5f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.45f)))
     ) {
-        Text(
-            text = persona?.nombre ?: "Cupo libre",
-            color = if (persona == null) TextoGris else TextoClaro,
-            fontFamily = Nunito,
-            fontWeight = FontWeight.Black,
-            fontSize = 13.sp,
-            style = TextStyle(shadow = Shadow(Color.Black.copy(alpha = 0.6f), Offset(0f, 2f), 8f)),
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(start = 10.dp, bottom = 8.dp)
-        )
+        if (conNombre) {
+            Text(
+                text = persona?.nombre ?: "Cupo libre",
+                color = if (persona == null) TextoGris else TextoClaro,
+                fontFamily = Nunito,
+                fontWeight = FontWeight.Black,
+                fontSize = 13.sp,
+                style = TextStyle(shadow = Shadow(Color.Black.copy(alpha = 0.6f), Offset(0f, 2f), 8f)),
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 10.dp, bottom = 8.dp)
+            )
+        }
     }
 }
 
@@ -469,7 +488,8 @@ fun TribusPreview() {
             onSaltar = {},
             onUnirme = {},
             onVerDeNuevo = {},
-            onVolver = {}
+            onVolver = {},
+            onVerTribu = {}
         )
     }
 }
