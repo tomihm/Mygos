@@ -15,6 +15,9 @@ interface CuentaDao {
     @Query("SELECT * FROM cuentas WHERE correo = :correo")
     suspend fun buscar(correo: String): CuentaEntity?
 
+    @Query("SELECT * FROM cuentas WHERE id = :id")
+    suspend fun buscarPorId(id: Int): CuentaEntity?
+
     @Query("SELECT COUNT(*) FROM cuentas")
     suspend fun contarCuentas(): Int
 

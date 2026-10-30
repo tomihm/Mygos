@@ -20,6 +20,10 @@ data class CuentaEntity(
 )
 
 // Convierten entre la fila de la base y el modelo que usan las pantallas
-fun CuentaEntity.aModelo() = Cuenta(correo, clave, Usuario(id, nombre, iniciales, Color(color)))
+// Las cuentas de prueba recuperan su foto; las cuentas nuevas no tienen
+fun CuentaEntity.aModelo(): Cuenta {
+    val foto = cuentasIniciales.find { it.usuario.id == id }?.usuario?.foto
+    return Cuenta(correo, clave, Usuario(id, nombre, iniciales, Color(color), foto))
+}
 
 fun Cuenta.aEntidad() = CuentaEntity(usuario.id, correo, clave, usuario.nombre, usuario.iniciales, usuario.color.toArgb())

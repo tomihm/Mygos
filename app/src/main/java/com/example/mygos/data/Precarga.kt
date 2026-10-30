@@ -2,6 +2,8 @@ package com.example.mygos.data
 
 import com.example.mygos.Cuenta
 import com.example.mygos.Evento
+import com.example.mygos.Mensaje
+import com.example.mygos.Publicacion
 import com.example.mygos.R
 import com.example.mygos.Tribu
 import com.example.mygos.anaL
@@ -39,6 +41,7 @@ val eventosIniciales = listOf(
         fecha = "Hoy · sábado 24 de octubre",
         horario = "17:00 – 22:00",
         lugar = "Parque Central (ficticio)",
+        latitud = -33.4365, longitud = -70.6421,
         detalleLugar = "Escenario principal",
         descripcion = "Una tarde de jazz al aire libre con bandas locales. Trae algo para sentarte en el pasto; habrá foodtrucks.",
         buscanGrupo = 18
@@ -56,6 +59,7 @@ val eventosIniciales = listOf(
         fecha = "Lunes 26 de octubre",
         horario = "20:30 – 23:00",
         lugar = "Cerro Mirador (ficticio)",
+        latitud = -33.4254, longitud = -70.6333,
         detalleLugar = "Explanada sur",
         descripcion = "Proyección al aire libre de un clásico del cine. Lleva una manta; hay cabritas a la venta.",
         buscanGrupo = 7
@@ -73,6 +77,7 @@ val eventosIniciales = listOf(
         fecha = "Martes 3 de noviembre",
         horario = "19:00 – 23:30",
         lugar = "Ludoteca Central (ficticia)",
+        latitud = -33.4411, longitud = -70.6502,
         detalleLugar = "Sala 2",
         descripcion = "Mesas con más de 200 juegos y monitores que te enseñan las reglas. No necesitas saber jugar.",
         buscanGrupo = 6
@@ -90,6 +95,7 @@ val eventosIniciales = listOf(
         fecha = "Sábado 7 de noviembre",
         horario = "20:00 – 23:00",
         lugar = "Disquería El Surco (ficticia)",
+        latitud = -33.4378, longitud = -70.6368,
         detalleLugar = "Segundo piso",
         descripcion = "Escuchamos discos completos de principio a fin y después se conversa. Puedes llevar tus vinilos.",
         buscanGrupo = 9
@@ -127,6 +133,21 @@ val tribusIniciales = listOf(
         listOf(nicoT, anaL, rodriF), 6,
         listOf("Vinilos", "Rock", "Soul"), "19:45 en la puerta de la disquería", 90
     )
+)
+
+val publicacionesIniciales = listOf(
+    Publicacion(1, 1, nicoT, null),
+    Publicacion(2, 1, juanP, null),
+    Publicacion(3, 1, anaL, null),
+    Publicacion(4, 2, rodriF, null),
+    Publicacion(5, 2, daniK, null)
+)
+
+val mensajesIniciales = listOf(
+    Mensaje(1, 1, nicoT, "¡Hola tribu! Estamos votando dónde juntarnos."),
+    Mensaje(2, 1, anaL, "Yo llevo algo para picar. ¿Alguien tiene parlante?"),
+    Mensaje(3, 2, rodriF, "¿Nos juntamos frente al escenario a las 16:45?"),
+    Mensaje(4, 2, daniK, "Dale, yo llego un poco antes para guardar lugar.")
 )
 
 // Guarda las cuentas de prueba solo si la tabla esta vacia (primera vez que se abre la app)

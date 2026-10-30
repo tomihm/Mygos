@@ -30,11 +30,12 @@ object TribuRepository {
     }
 
     // Cambia la tribu en la lista por una copia que incluye al usuario.
-    // Devuelve false si la tribu ya no tiene cupos
+    // Devuelve false si la tribu ya no tiene cupos o si el usuario ya esta en otra tribu del mismo evento
     fun unirse(tribu: Tribu, usuario: Usuario): Boolean {
         val actual = _tribus.value.find { it.id == tribu.id } ?: return false
         if (actual.integrantes.any { it.id == usuario.id }) return true
         if (actual.integrantes.size >= actual.cupos) return false
+        if (_tribus.value.any { otra -> otra.eventoId == actual.eventoId && otra.integrantes.any { it.id == usuario.id } }) return false
         _tribus.update { lista ->
             lista.map { if (it.id == tribu.id) it.copy(integrantes = it.integrantes + usuario) else it }
         }

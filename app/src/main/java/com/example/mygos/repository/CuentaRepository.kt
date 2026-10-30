@@ -40,6 +40,16 @@ object CuentaRepository {
         return usuarioActual
     }
 
+    // La cuenta sigue guardada en Room; solo se olvida quien esta usando la app
+    fun cerrarSesion() {
+        usuarioActual = null
+    }
+
+    // El correo para mostrarlo en el perfil
+    suspend fun correoDe(usuarioId: Int): String {
+        return dao.buscarPorId(usuarioId)?.correo ?: ""
+    }
+
     suspend fun existeCorreo(correo: String): Boolean {
         return dao.buscar(correo.trim().lowercase()) != null
     }
