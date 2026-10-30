@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 data class ExplorarEstado(
-    val categorias: List<String> = EventoRepository.obtenerCategorias(),
+    val categorias: List<String> = EventoRepository.categorias,
     val categoria: String = "Todos",
     val eventos: List<Evento> = emptyList(),
     val misTribus: Int = 0

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mygos.repository.CuentaRepository
 import com.example.mygos.validacion.Validaciones
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +26,9 @@ class CrearCuentaViewModel : ViewModel() {
 
     private val _estado = MutableStateFlow(CrearCuentaEstado())
     val estado: StateFlow<CrearCuentaEstado> = _estado.asStateFlow()
+
+    // El guardado en curso. Si se toca "Crear cuenta" dos veces rapido, el segundo toque se ignora
+    private var guardando: Job? = null
 
     // Si el campo ya mostraba un error se vuelve a validar al escribir, asi el mensaje se va apenas se corrige
     fun cambiarNombre(nombre: String) {
@@ -53,8 +57,9 @@ class CrearCuentaViewModel : ViewModel() {
         val errorClave = Validaciones.clave(actual.clave)
         _estado.update { it.copy(errorNombre = errorNombre, errorCorreo = errorCorreo, errorClave = errorClave) }
         if (errorNombre.isNotEmpty() || errorCorreo.isNotEmpty() || errorClave.isNotEmpty()) return
+        if (guardando?.isActive == true) return
 
-        viewModelScope.launch {
+        guardando = viewModelScope.launch {
             val correo = actual.correo.trim()
             if (CuentaRepository.existeCorreo(correo)) {
                 _estado.update { it.copy(errorCorreo = "Ya existe una cuenta con ese correo") }

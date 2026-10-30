@@ -47,7 +47,8 @@ class TribuDetalleViewModel(tribuId: Int, private val usuario: Usuario) : ViewMo
         if (TribuRepository.unirse(tribu, usuario)) {
             local.update { it.copy(unido = true) }
         } else {
-            local.update { it.copy(error = "Esta tribu ya está llena") }
+            val mensaje = if (estado.value.evento?.yaTienesTribu == true) "Ya tienes tribu en este evento" else "Esta tribu ya está llena"
+            local.update { it.copy(error = mensaje) }
         }
     }
 

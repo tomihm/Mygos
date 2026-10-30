@@ -50,7 +50,8 @@ class TribusViewModel(eventoId: Int) : ViewModel() {
         if (TribuRepository.unirse(tribu, usuario)) {
             local.update { it.copy(unidoA = tribu) }
         } else {
-            local.update { it.copy(error = "Esta tribu ya está llena") }
+            val mensaje = if (estado.value.evento?.yaTienesTribu == true) "Ya tienes tribu en este evento" else "Esta tribu ya está llena"
+            local.update { it.copy(error = mensaje) }
         }
     }
 
