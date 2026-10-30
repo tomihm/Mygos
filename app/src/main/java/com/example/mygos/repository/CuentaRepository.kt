@@ -1,7 +1,6 @@
 package com.example.mygos.repository
 
 import androidx.compose.ui.graphics.toArgb
-import com.example.mygos.Cuenta
 import com.example.mygos.Usuario
 import com.example.mygos.data.CuentaDao
 import com.example.mygos.data.CuentaEntity
@@ -12,8 +11,6 @@ import com.example.mygos.ui.theme.Ladrillo
 import com.example.mygos.ui.theme.NaranjaOscuro
 import com.example.mygos.ui.theme.Turquesa
 import com.example.mygos.ui.theme.VerdeBosque
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 object CuentaRepository {
 
@@ -28,10 +25,6 @@ object CuentaRepository {
 
     fun iniciar(dao: CuentaDao) {
         this.dao = dao
-    }
-
-    fun cuentasDePrueba(): Flow<List<Cuenta>> {
-        return dao.cuentasDePrueba().map { lista -> lista.map { it.aModelo() } }
     }
 
     suspend fun iniciarSesion(correo: String, clave: String): Usuario? {

@@ -19,7 +19,7 @@ App Android para descubrir eventos e ir acompañado: eliges un evento y la app t
  
 | | Funcionalidad | Estado |
 |---|---|---|
-| 🔐 | **Crear cuenta e iniciar sesión** con validación por campo, íconos y cuentas de prueba | ✅ Listo |
+| 🔐 | **Crear cuenta e iniciar sesión** con validación por campo e íconos | ✅ Listo |
 | 🧭 | **Explorar eventos** con filtro por categoría (Todos, Música, Cine, Juegos) | ✅ Listo |
 | 👥 | **Tribus**: carrusel animado para elegir grupo (la tarjeta sale volando al unirte o saltar), detalle, unirse (una tribu por evento) y salir | ✅ Listo |
 | 🎉 | **¡Ya tienes tribu!** con animación de celebración | ✅ Listo |
@@ -77,7 +77,7 @@ Cada pantalla tiene dos funciones: `XRuta` conecta el ViewModel y `XScreen` solo
 | 2.1.1 Interfaz y navegación | `navegacion/Navegacion.kt`, `ui/` |
 | 2.1.2 Formularios con validación visual | `ui/cuenta/CuentaScreen.kt`, `ui/eventos/PublicarEventoScreen.kt`, `CampoTexto` y `CampoSelector` en `ui/componentes` |
 | 2.2.1 Validación desacoplada | `validacion/Validaciones.kt` + ViewModels de formularios |
-| 2.2.2 Animaciones | tarjeta del carrusel en `ui/tribus/TribusScreen.kt`, celebración en `TribuScreen.kt`, transiciones en `Navegacion.kt`, sacudida en `CampoTexto`, error y cuentas en `CuentaScreen.kt`, pulso en `EncuentroScreen.kt`, `animateItem` en chat |
+| 2.2.2 Animaciones | tarjeta del carrusel en `ui/tribus/TribusScreen.kt`, celebración en `TribuScreen.kt`, transiciones en `Navegacion.kt`, sacudida en `CampoTexto`, error del login en `CuentaScreen.kt`, pulso en `EncuentroScreen.kt`, `animateItem` en chat |
 | 2.3.1 Modularidad y persistencia | paquetes de arriba + Room en `data/` |
 | 2.4.1 Recursos del dispositivo | cámara en `ui/tribus/MuroScreen.kt`, GPS en `ui/tribus/EncuentroScreen.kt`, permisos en `AndroidManifest.xml` |
  

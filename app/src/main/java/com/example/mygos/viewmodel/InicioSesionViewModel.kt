@@ -2,14 +2,11 @@ package com.example.mygos.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mygos.Cuenta
 import com.example.mygos.repository.CuentaRepository
 import com.example.mygos.validacion.Validaciones
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -28,9 +25,6 @@ class InicioSesionViewModel : ViewModel() {
     private val _estado = MutableStateFlow(InicioSesionEstado())
     val estado: StateFlow<InicioSesionEstado> = _estado.asStateFlow()
 
-    val cuentasDePrueba: StateFlow<List<Cuenta>> = CuentaRepository.cuentasDePrueba()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
     fun cambiarCorreo(correo: String) {
         _estado.update {
             it.copy(correo = correo, errorCorreo = if (it.errorCorreo.isNotEmpty()) Validaciones.correo(correo) else "", error = "")
@@ -40,12 +34,6 @@ class InicioSesionViewModel : ViewModel() {
     fun cambiarClave(clave: String) {
         _estado.update {
             it.copy(clave = clave, errorClave = if (it.errorClave.isNotEmpty()) Validaciones.claveIngresada(clave) else "", error = "")
-        }
-    }
-
-    fun elegirCuenta(cuenta: Cuenta) {
-        _estado.update {
-            it.copy(correo = cuenta.correo, clave = cuenta.clave, errorCorreo = "", errorClave = "", error = "")
         }
     }
 
