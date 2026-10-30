@@ -1,5 +1,12 @@
-package com.example.mygos
+package com.example.mygos.ui.cuenta
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -32,18 +39,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mygos.Cuenta
 import com.example.mygos.data.cuentasIniciales
+import com.example.mygos.ui.componentes.Avatar
+import com.example.mygos.ui.componentes.BotonCircular
+import com.example.mygos.ui.componentes.BotonNaranja
+import com.example.mygos.ui.componentes.CampoTexto
+import com.example.mygos.ui.componentes.Titulo
 import com.example.mygos.ui.theme.Fondo
-import com.example.mygos.ui.theme.InstrumentSerif
 import com.example.mygos.ui.theme.MygosTheme
 import com.example.mygos.ui.theme.Naranja
 import com.example.mygos.ui.theme.Nunito
@@ -138,9 +147,20 @@ fun InicioSesionScreen(
             tipo = KeyboardType.Password,
             esClave = true
         )
-        if (estado.error.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = estado.error, color = Naranja, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+        // El mensaje entra deslizandose y se va con fundido en vez de aparecer de golpe
+        AnimatedVisibility(
+            visible = estado.error.isNotEmpty(),
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            Text(
+                text = estado.error,
+                color = Naranja,
+                fontFamily = Nunito,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -273,26 +293,21 @@ fun CrearCuentaScreen(
     }
 }
 
-@Composable
-fun Titulo(normal: String, cursiva: String) {
-    Text(
-        text = buildAnnotatedString {
-            withStyle(SpanStyle(fontFamily = Nunito, fontWeight = FontWeight.Black, fontSize = 32.sp)) {
-                append("$normal ")
-            }
-            withStyle(SpanStyle(fontFamily = InstrumentSerif, fontSize = 40.sp)) {
-                append(cursiva)
-            }
-        },
-        color = TextoClaro
-    )
-}
 
 @Composable
 fun FilaCuenta(cuenta: Cuenta, seleccionada: Boolean, onClick: () -> Unit) {
     val forma = RoundedCornerShape(14.dp)
-    val fondo = if (seleccionada) Naranja.copy(alpha = 0.16f) else Tarjeta
-    val borde = if (seleccionada) Naranja else Color.White.copy(alpha = 0.08f)
+    // El color cambia en 250 ms en vez de saltar, asi se nota cual cuenta se eligio
+    val fondo by animateColorAsState(
+        targetValue = if (seleccionada) Naranja.copy(alpha = 0.16f) else Tarjeta,
+        animationSpec = tween(250),
+        label = "fondoCuenta"
+    )
+    val borde by animateColorAsState(
+        targetValue = if (seleccionada) Naranja else Color.White.copy(alpha = 0.08f),
+        animationSpec = tween(250),
+        label = "bordeCuenta"
+    )
 
     Row(
         modifier = Modifier

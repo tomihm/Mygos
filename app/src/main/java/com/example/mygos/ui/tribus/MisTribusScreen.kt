@@ -1,4 +1,4 @@
-package com.example.mygos
+package com.example.mygos.ui.tribus
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -39,8 +39,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mygos.Tribu
+import com.example.mygos.Usuario
 import com.example.mygos.data.eventosIniciales
 import com.example.mygos.data.tribusIniciales
+import com.example.mygos.ui.componentes.BarraInferior
+import com.example.mygos.ui.componentes.BotonNaranja
+import com.example.mygos.ui.componentes.Seccion
+import com.example.mygos.ui.componentes.Titulo
 import com.example.mygos.ui.theme.Amarillo
 import com.example.mygos.ui.theme.Fondo
 import com.example.mygos.ui.theme.IconoGris

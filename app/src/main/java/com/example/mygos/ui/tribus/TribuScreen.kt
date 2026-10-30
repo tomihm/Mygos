@@ -1,4 +1,4 @@
-package com.example.mygos
+package com.example.mygos.ui.tribus
 
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
@@ -28,9 +28,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.GroupAdd
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -58,8 +60,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mygos.Evento
+import com.example.mygos.Tribu
+import com.example.mygos.Usuario
 import com.example.mygos.data.eventosIniciales
 import com.example.mygos.data.tribusIniciales
+import com.example.mygos.ui.componentes.Avatar
+import com.example.mygos.ui.componentes.BotonCircular
+import com.example.mygos.ui.componentes.BotonContorno
+import com.example.mygos.ui.componentes.BotonNaranja
+import com.example.mygos.ui.componentes.CajaDato
+import com.example.mygos.ui.componentes.Subtitulo
 import com.example.mygos.ui.theme.Amarillo
 import com.example.mygos.ui.theme.Fondo
 import com.example.mygos.ui.theme.InstrumentSerif
@@ -82,6 +93,8 @@ fun TribuDetalleRuta(
     usuario: Usuario,
     onVolver: () -> Unit,
     onUnido: (Tribu) -> Unit,
+    onChat: () -> Unit,
+    onMuro: () -> Unit,
     viewModel: TribuDetalleViewModel = viewModel { TribuDetalleViewModel(tribuId, usuario) }
 ) {
     val context = LocalContext.current
@@ -108,7 +121,9 @@ fun TribuDetalleRuta(
             onUnirme = viewModel::unirse,
             onPedirSalir = viewModel::pedirSalir,
             onCancelarSalir = viewModel::cancelarSalir,
-            onSalir = viewModel::salir
+            onSalir = viewModel::salir,
+            onChat = onChat,
+            onMuro = onMuro
         )
     }
 }
@@ -120,7 +135,9 @@ fun TribuDetalleScreen(
     onUnirme: () -> Unit,
     onPedirSalir: () -> Unit,
     onCancelarSalir: () -> Unit,
-    onSalir: () -> Unit
+    onSalir: () -> Unit,
+    onChat: () -> Unit,
+    onMuro: () -> Unit
 ) {
     val tribu = estado.tribu ?: return
     val evento = estado.evento ?: return
@@ -221,7 +238,12 @@ fun TribuDetalleScreen(
                         Text("Ya eres parte de esta tribu", color = Verde, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
-                    BotonContorno(texto = "Salir de la tribu", onClick = onPedirSalir, icono = Icons.AutoMirrored.Filled.Logout)
+                    BotonNaranja(texto = "Ir al chat de la tribu", onClick = onChat, icono = Icons.AutoMirrored.Filled.Chat)
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        BotonContorno(texto = "Muro", onClick = onMuro, icono = Icons.Filled.PhotoLibrary, modifier = Modifier.weight(1f))
+                        BotonContorno(texto = "Salir", onClick = onPedirSalir, icono = Icons.AutoMirrored.Filled.Logout, modifier = Modifier.weight(1f))
+                    }
                 }
                 estado.llena -> {
                     BotonContorno(texto = "Esta tribu ya está llena", onClick = {}, colorTexto = TextoGris)
@@ -255,24 +277,7 @@ fun TribuDetalleScreen(
     }
 }
 
-@Composable
-fun CajaDato(titulo: String, valor: String, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(Tarjeta)
-            .padding(14.dp)
-    ) {
-        Text(titulo, color = TextoGris, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp, letterSpacing = 0.66.sp)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(valor, color = TextoClaro, fontFamily = Nunito, fontWeight = FontWeight.Black, fontSize = 14.sp)
-    }
-}
 
-@Composable
-fun Subtitulo(texto: String) {
-    Text(texto, color = TextoClaro, fontFamily = Nunito, fontWeight = FontWeight.Black, fontSize = 17.sp)
-}
 
 @Composable
 fun Integrante(persona: Usuario) {
@@ -299,7 +304,7 @@ fun Integrante(persona: Usuario) {
 fun YaTienesTribuRuta(
     tribuId: Int,
     usuario: Usuario,
-    onVerMisTribus: () -> Unit,
+    onSaludar: () -> Unit,
     onVerOtrasTribus: () -> Unit,
     viewModel: TribuDetalleViewModel = viewModel { TribuDetalleViewModel(tribuId, usuario) }
 ) {
@@ -307,7 +312,7 @@ fun YaTienesTribuRuta(
     val tribu = estado.tribu
     val evento = estado.evento
     if (tribu != null && evento != null) {
-        YaTienesTribuScreen(tribu, evento, onVerMisTribus, onVerOtrasTribus)
+        YaTienesTribuScreen(tribu, evento, onSaludar, onVerOtrasTribus)
     }
 }
 
@@ -324,7 +329,7 @@ private val burbujas = listOf(
 fun YaTienesTribuScreen(
     tribu: Tribu,
     evento: Evento,
-    onVerMisTribus: () -> Unit,
+    onSaludar: () -> Unit,
     onVerOtrasTribus: () -> Unit
 ) {
     // La tarjeta sube y aparece despues de que entran las burbujas
@@ -399,8 +404,8 @@ fun YaTienesTribuScreen(
             }
             Spacer(modifier = Modifier.height(18.dp))
             BotonContorno(
-                texto = "Ver mis tribus",
-                onClick = onVerMisTribus,
+                texto = "Saludar a la tribu",
+                onClick = onSaludar,
                 colorTexto = Fondo,
                 colorBorde = TextoClaro,
                 fondo = TextoClaro
@@ -450,7 +455,9 @@ fun TribuDetallePreview() {
             onUnirme = {},
             onPedirSalir = {},
             onCancelarSalir = {},
-            onSalir = {}
+            onSalir = {},
+            onChat = {},
+            onMuro = {}
         )
     }
 }
@@ -459,6 +466,6 @@ fun TribuDetallePreview() {
 @Composable
 fun YaTienesTribuPreview() {
     MygosTheme {
-        YaTienesTribuScreen(tribusIniciales[0], eventosIniciales[0], onVerMisTribus = {}, onVerOtrasTribus = {})
+        YaTienesTribuScreen(tribusIniciales[0], eventosIniciales[0], onSaludar = {}, onVerOtrasTribus = {})
     }
 }

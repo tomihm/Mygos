@@ -1,4 +1,4 @@
-package com.example.mygos
+package com.example.mygos.ui.cuenta
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mygos.ui.componentes.BotonNaranja
 import com.example.mygos.ui.theme.Amarillo
 import com.example.mygos.ui.theme.BotonOscuro
 import com.example.mygos.ui.theme.Fondo

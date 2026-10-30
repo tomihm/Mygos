@@ -1,10 +1,9 @@
-package com.example.mygos
+package com.example.mygos.ui.eventos
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,15 +20,10 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.LocalActivity
-import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,7 +36,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -52,10 +44,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mygos.Evento
+import com.example.mygos.Usuario
 import com.example.mygos.data.eventosIniciales
+import com.example.mygos.ui.componentes.Avatar
+import com.example.mygos.ui.componentes.BarraInferior
+import com.example.mygos.ui.componentes.Filtros
+import com.example.mygos.ui.componentes.Seccion
 import com.example.mygos.ui.theme.Amarillo
 import com.example.mygos.ui.theme.Fondo
-import com.example.mygos.ui.theme.IconoGris
 import com.example.mygos.ui.theme.InstrumentSerif
 import com.example.mygos.ui.theme.MygosTheme
 import com.example.mygos.ui.theme.Naranja
@@ -66,6 +63,7 @@ import com.example.mygos.ui.theme.TextoGris
 import com.example.mygos.ui.theme.TextoSuave
 import com.example.mygos.ui.theme.TextoTarjeta
 import com.example.mygos.ui.theme.Verde
+import com.example.mygos.valeM
 import com.example.mygos.viewmodel.ExplorarEstado
 import com.example.mygos.viewmodel.ExplorarViewModel
 
@@ -166,38 +164,6 @@ fun Encabezado(usuario: Usuario) {
     }
 }
 
-@Composable
-fun Filtros(categorias: List<String>, seleccionada: String, onSeleccionar: (String) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        for (cat in categorias) {
-            val activa = cat == seleccionada
-            Box(
-                modifier = Modifier
-                    .height(38.dp)
-                    .clip(CircleShape)
-                    .background(if (activa) TextoClaro else Color.Transparent)
-                    .border(1.dp, if (activa) TextoClaro else Color.White.copy(alpha = 0.16f), CircleShape)
-                    .clickable { onSeleccionar(cat) }
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = cat,
-                    color = if (activa) Fondo else TextoClaro,
-                    fontFamily = Nunito,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 14.sp
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun TarjetaEvento(evento: Evento, onClick: () -> Unit) {
@@ -355,79 +321,8 @@ fun TarjetaEvento(evento: Evento, onClick: () -> Unit) {
     }
 }
 
-enum class Seccion { EVENTOS, TRIBUS, PERFIL }
 
-// Barra de abajo que comparten Explorar y Mis tribus. El aviso naranja cuenta las tribus del usuario
-@Composable
-fun BarraInferior(actual: Seccion, misTribus: Int, onIr: (Seccion) -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Fondo.copy(alpha = 0.92f))
-            .navigationBarsPadding()
-    ) {
-        HorizontalDivider(color = Color.White.copy(alpha = 0.06f), thickness = 1.dp)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 45.dp, end = 45.dp, top = 10.dp, bottom = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            ItemBarra(Icons.Filled.LocalActivity, "Eventos", activo = actual == Seccion.EVENTOS, onClick = { onIr(Seccion.EVENTOS) })
-            ItemBarra(Icons.Outlined.Groups, "Tribus", activo = actual == Seccion.TRIBUS, aviso = misTribus, onClick = { onIr(Seccion.TRIBUS) })
-            ItemBarra(Icons.Outlined.Person, "Perfil", activo = actual == Seccion.PERFIL, onClick = { onIr(Seccion.PERFIL) })
-        }
-    }
-}
 
-@Composable
-fun ItemBarra(icono: ImageVector, texto: String, activo: Boolean, onClick: () -> Unit, aviso: Int = 0) {
-    val color = if (activo) Naranja else IconoGris
-    Column(
-        modifier = Modifier
-            .width(72.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .clickable { onClick() },
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box {
-            Icon(
-                imageVector = icono,
-                contentDescription = texto,
-                tint = color,
-                modifier = Modifier
-                    .padding(top = 4.dp)
-                    .size(26.dp)
-            )
-            if (aviso > 0) {
-                Box(
-                    modifier = Modifier
-                        .offset(x = 19.dp, y = (-4).dp)
-                        .size(18.dp)
-                        .clip(CircleShape)
-                        .background(Naranja),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = aviso.toString(),
-                        color = Color.White,
-                        fontFamily = Nunito,
-                        fontWeight = FontWeight.Black,
-                        fontSize = 11.sp
-                    )
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = texto,
-            color = color,
-            fontFamily = Nunito,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 11.sp
-        )
-    }
-}
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable

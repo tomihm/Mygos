@@ -1,4 +1,4 @@
-package com.example.mygos
+package com.example.mygos.ui.eventos
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,8 +29,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,10 +44,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mygos.viewmodel.EventoViewModel
+import com.example.mygos.Evento
+import com.example.mygos.data.eventosIniciales
+import com.example.mygos.ui.componentes.Avatar
+import com.example.mygos.ui.componentes.BotonCircular
+import com.example.mygos.ui.componentes.BotonNaranja
 import com.example.mygos.ui.theme.Amarillo
 import com.example.mygos.ui.theme.Fondo
-import com.example.mygos.data.eventosIniciales
 import com.example.mygos.ui.theme.MygosTheme
 import com.example.mygos.ui.theme.Naranja
 import com.example.mygos.ui.theme.Nunito
@@ -55,6 +58,7 @@ import com.example.mygos.ui.theme.Tarjeta
 import com.example.mygos.ui.theme.TextoClaro
 import com.example.mygos.ui.theme.TextoDescripcion
 import com.example.mygos.ui.theme.TextoSuave
+import com.example.mygos.viewmodel.EventoViewModel
 
 @Composable
 fun EventoRuta(

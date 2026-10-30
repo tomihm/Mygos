@@ -1,6 +1,11 @@
-package com.example.mygos
+package com.example.mygos.ui.tribus
 
 import android.widget.Toast
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,13 +32,14 @@ import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.outlined.EventNote
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,7 +48,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,12 +62,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mygos.Evento
+import com.example.mygos.Tribu
+import com.example.mygos.Usuario
+import com.example.mygos.data.eventosIniciales
+import com.example.mygos.data.tribusIniciales
+import com.example.mygos.ui.componentes.BotonCircular
+import com.example.mygos.ui.componentes.BotonNaranja
+import com.example.mygos.ui.componentes.rayas
+import com.example.mygos.ui.cuenta.TextoEnlace
 import com.example.mygos.ui.theme.Amarillo
 import com.example.mygos.ui.theme.Azul
 import com.example.mygos.ui.theme.BotonOscuro
 import com.example.mygos.ui.theme.Fondo
-import com.example.mygos.data.eventosIniciales
-import com.example.mygos.data.tribusIniciales
 import com.example.mygos.ui.theme.MygosTheme
 import com.example.mygos.ui.theme.Naranja
 import com.example.mygos.ui.theme.Nunito
@@ -68,6 +86,8 @@ import com.example.mygos.ui.theme.TextoSuave
 import com.example.mygos.ui.theme.Verde
 import com.example.mygos.viewmodel.TribusEstado
 import com.example.mygos.viewmodel.TribusViewModel
+import kotlin.math.abs
+import kotlinx.coroutines.launch
 
 @Composable
 fun TribusRuta(
@@ -119,8 +139,6 @@ fun TribusScreen(
     onVolver: () -> Unit,
     onVerTribu: (Tribu) -> Unit
 ) {
-    val context = LocalContext.current
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -155,12 +173,6 @@ fun TribusScreen(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
-            BotonCircular(
-                icono = Icons.Outlined.ViewAgenda,
-                descripcion = "Ver como lista",
-                onClick = { Toast.makeText(context, "Próximamente", Toast.LENGTH_SHORT).show() }
-            )
         }
 
         // una barrita por cada tribu, como las historias
@@ -185,6 +197,35 @@ fun TribusScreen(
 
         val tribu = estado.tribuActual
         if (tribu != null) {
+            // desliz va de -1 (sale por la izquierda: salto) a 1 (sale por la derecha: me uno). 0 = al centro
+            val desliz = remember { Animatable(0f) }
+            val entrada = remember { Animatable(1f) }
+            val scope = rememberCoroutineScope()
+            val vibracion = LocalHapticFeedback.current
+
+            // Cada tribu nueva entra creciendo desde atras con un rebote
+            LaunchedEffect(tribu.id) {
+                desliz.snapTo(0f)
+                entrada.snapTo(0.85f)
+                entrada.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+            }
+
+            val saltar: () -> Unit = {
+                scope.launch {
+                    desliz.animateTo(-1f, tween(280))
+                    onSaltar()
+                }
+            }
+            val unirme: () -> Unit = {
+                vibracion.performHapticFeedback(HapticFeedbackType.LongPress)
+                scope.launch {
+                    desliz.animateTo(1f, tween(320))
+                    onUnirme()
+                    // si no se pudo unir (llena o ya tiene tribu) la tarjeta vuelve a su lugar
+                    desliz.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                }
+            }
+
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -196,7 +237,32 @@ fun TribusScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(start = 14.dp, end = 14.dp, bottom = 44.dp)
+                        .graphicsLayer {
+                            translationX = desliz.value * size.width
+                            rotationZ = desliz.value * 14f
+                            scaleX = entrada.value
+                            scaleY = entrada.value
+                        }
                 )
+                // Sello que aparece mientras la tarjeta se va: verde al unirse, gris al saltar
+                if (desliz.value != 0f) {
+                    val meUno = desliz.value > 0
+                    Text(
+                        text = if (meUno) "¡ME UNO!" else "PASO",
+                        color = if (meUno) Verde else TextoClaro,
+                        fontFamily = Nunito,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 34.sp,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .graphicsLayer {
+                                alpha = abs(desliz.value)
+                                rotationZ = if (meUno) -12f else 12f
+                            }
+                            .border(4.dp, if (meUno) Verde else TextoClaro, RoundedCornerShape(12.dp))
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                    )
+                }
                 Row(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -209,7 +275,7 @@ fun TribusScreen(
                             .shadow(14.dp, CircleShape)
                             .clip(CircleShape)
                             .background(TextoClaro)
-                            .clickable { onSaltar() },
+                            .clickable { saltar() },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -226,7 +292,7 @@ fun TribusScreen(
                             .shadow(16.dp, CircleShape, spotColor = Naranja, ambientColor = Naranja)
                             .clip(CircleShape)
                             .background(Naranja)
-                            .clickable { onUnirme() },
+                            .clickable { unirme() },
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -428,8 +494,21 @@ fun CuadroIntegrante(persona: Usuario?, modifier: Modifier = Modifier, conNombre
             .height(148.dp)
             .background(fondo)
             .rayas()
-            .background(Brush.verticalGradient(0.5f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.45f)))
     ) {
+        if (persona?.foto != null) {
+            Image(
+                painter = painterResource(persona.foto),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        // degradado abajo para que el nombre se lea sobre la foto
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Brush.verticalGradient(0.5f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.45f)))
+        )
         if (conNombre) {
             Text(
                 text = persona?.nombre ?: "Cupo libre",
