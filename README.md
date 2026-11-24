@@ -29,6 +29,7 @@ App Android para descubrir eventos e ir acompañado: eliges un evento y la app t
 | 🧑‍💼 | **Organizador**: publicar evento (con fecha y hora) y ver mis eventos | ✅ Listo |
 | 👤 | **Perfil** con foto, resumen y cerrar sesión | ✅ Listo |
 | 🖼️ | **Fotos de perfil** ficticias para los usuarios de prueba | ✅ Listo |
+| 🌐 | **Foro de la comunidad** desde una **API externa**: ver, abrir con autor y comentarios, publicar, editar y borrar | ✅ Listo |
  
 ---
  
@@ -40,6 +41,8 @@ App Android para descubrir eventos e ir acompañado: eliges un evento y la app t
 - **Room** (con KSP) para guardar las cuentas en el teléfono
 - **Cámara**: permiso `CAMERA` en tiempo de ejecución + `FileProvider` + `ActivityResultContracts.TakePicture`
 - **GPS**: permisos de ubicación + `FusedLocationProviderClient` (Google Play Services Location)
+- **Retrofit** + **Gson** para consumir la API REST del foro, con corrutinas (`suspend`)
+- **Pruebas unitarias** con JUnit en `app/src/test`
 - Animaciones de Compose: `AnimatedVisibility`, `animateColorAsState`, `Animatable`, `spring`, `rememberInfiniteTransition`, `animateItem`
 - Modales: `AlertDialog` (salir de tribu, cerrar sesión), `DatePickerDialog` y selector de hora
 - Tipografías **Nunito** e **Instrument Serif Italic**, paleta propia en `ui/theme`
@@ -53,7 +56,8 @@ app/src/main/java/com/example/mygos/
 ├── MainActivity.kt, MygosApp.kt   # Entrada de la app; MygosApp crea la base de datos
 ├── Datos.kt                       # Modelos: Usuario, Cuenta, Evento, Tribu, Publicacion, Mensaje
 ├── data/                          # Room (entidad, DAO, base) y datos de ejemplo
-├── repository/                    # Fuente de datos de cada tema (cuentas, eventos, tribus, chat, muro)
+├── remote/ForoApi.kt              # Retrofit: endpoints, modelos del JSON y cliente
+├── repository/                    # Fuente de datos de cada tema (cuentas, eventos, tribus, chat, muro, foro)
 ├── validacion/Validaciones.kt     # Todas las reglas de los formularios, sin UI
 ├── viewmodel/                     # Un ViewModel por pantalla, con su estado
 ├── navegacion/Navegacion.kt       # Rutas, NavHost y guardia de sesión
@@ -63,6 +67,7 @@ app/src/main/java/com/example/mygos/
     ├── eventos/                   # Explorar, detalle de evento, publicar, mis eventos
     ├── tribus/                    # Carrusel, detalle, ya tienes tribu, mis tribus, chat, muro, encuentro
     ├── perfil/                    # Perfil
+    ├── foro/                      # Foro de la comunidad (API externa)
     └── theme/                     # Colores, tipografía y tema
 ```
  
@@ -70,7 +75,7 @@ Cada pantalla tiene dos funciones: `XRuta` conecta el ViewModel y `XScreen` solo
  
 ---
  
-## 🧾 Rúbrica EP2 → dónde está
+## 🧾 Rúbrica → dónde está
  
 | Indicador | Dónde mirar |
 |---|---|
@@ -79,10 +84,55 @@ Cada pantalla tiene dos funciones: `XRuta` conecta el ViewModel y `XScreen` solo
 | 2.2.1 Validación desacoplada | `validacion/Validaciones.kt` + ViewModels de formularios |
 | 2.2.2 Animaciones | tarjeta del carrusel en `ui/tribus/TribusScreen.kt`, celebración en `TribuScreen.kt`, transiciones en `Navegacion.kt`, sacudida en `CampoTexto`, error del login en `CuentaScreen.kt`, pulso en `EncuentroScreen.kt`, `animateItem` en chat |
 | 2.3.1 Modularidad y persistencia | paquetes de arriba + Room en `data/` |
+| API externa (7 endpoints) | `remote/ForoApi.kt`, `repository/ForoRepository.kt`, `viewmodel/ForoViewModel.kt`, `ui/foro/ForoScreen.kt` |
+| Pruebas unitarias | `app/src/test/java/com/example/mygos/` |
+| APK firmado e ícono | `signingConfigs` en `app/build.gradle.kts`, `res/drawable/ic_launcher_*.xml` |
 | 2.4.1 Recursos del dispositivo | cámara en `ui/tribus/MuroScreen.kt`, GPS en `ui/tribus/EncuentroScreen.kt`, permisos en `AndroidManifest.xml` |
  
 ---
  
+## 🌐 API externa
+
+El foro usa [JSONPlaceholder](https://jsonplaceholder.typicode.com), una API REST pública de prueba. Responde como si guardara los cambios, pero no los guarda: lo que se publica o edita queda solo en el teléfono mientras la pantalla está abierta.
+
+| # | Método | Endpoint | Uso en la app |
+|---|---|---|---|
+| 1 | GET | `/posts` | Lista del foro (primeras 20) |
+| 2 | GET | `/posts/{id}` | Abrir una publicación |
+| 3 | GET | `/posts/{id}/comments` | Comentarios de la publicación |
+| 4 | GET | `/users/{id}` | Nombre del autor |
+| 5 | POST | `/posts` | Publicar |
+| 6 | PUT | `/posts/{id}` | Guardar cambios |
+| 7 | DELETE | `/posts/{id}` | Borrar |
+
+Capas: `ForoScreen` (UI) → `ForoViewModel` (estado, validación y errores de conexión) → `ForoRepository` → `ForoApi` (Retrofit).
+
+---
+
+## 🧪 Pruebas unitarias
+
+```bash
+./gradlew testDebugUnitTest
+```
+
+- `ValidacionesTest`: correo, clave, fecha y título de publicación.
+- `ForoRepositoryTest`: usa una API falsa (sin internet) para revisar que la lista se corta en 20 y que al publicar se envía el texto sin espacios sobrantes.
+
+---
+
+## 📦 APK firmado
+
+El APK release se firma con `mygos-release.jks`. El keystore y `keystore.properties` (rutas y claves) no se suben al repositorio.
+
+```bash
+./gradlew assembleRelease
+# queda en app/build/outputs/apk/release/app-release.apk
+```
+
+El ícono es propio: los dos anillos de la bienvenida (amarillo y naranja) sobre el fondo oscuro de la app (`res/drawable/ic_launcher_*.xml`).
+
+---
+
 ## 🚀 Cómo ejecutarlo
  
 1. Clona el repositorio
