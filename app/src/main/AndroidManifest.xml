@@ -10,6 +10,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <!-- Internet para el foro de la comunidad, que se carga desde una API externa -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".MygosApp"
         android:allowBackup="false"
