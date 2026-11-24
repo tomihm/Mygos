@@ -1,5 +1,6 @@
 package com.example.mygos.repository
 
+import android.content.SharedPreferences
 import androidx.compose.ui.graphics.toArgb
 import com.example.mygos.Usuario
 import com.example.mygos.data.CuentaDao
@@ -17,25 +18,46 @@ object CuentaRepository {
     // Lo entrega MygosApp al abrir la app
     private lateinit var dao: CuentaDao
 
+    // Guarda el id del usuario con sesion abierta, para que siga dentro al volver a abrir la app
+    private lateinit var sesion: SharedPreferences
+
     private val coloresNuevos = listOf(Turquesa, Ladrillo, Dorado, AzulGris, NaranjaOscuro, VerdeBosque)
 
     // El usuario que inicio sesion, null si nadie ha entrado
     var usuarioActual: Usuario? = null
         private set
 
-    fun iniciar(dao: CuentaDao) {
+    fun iniciar(dao: CuentaDao, sesion: SharedPreferences) {
         this.dao = dao
+        this.sesion = sesion
+    }
+
+    // Si quedo una sesion abierta la ultima vez, vuelve a cargar a ese usuario desde Room
+    suspend fun restaurarSesion() {
+        val id = sesion.getInt("usuarioId", -1)
+        if (id != -1) {
+            usuarioActual = dao.buscarPorId(id)?.aModelo()?.usuario
+        }
+    }
+
+    private fun guardarSesion(usuario: Usuario?) {
+        usuarioActual = usuario
+        if (usuario != null) {
+            sesion.edit().putInt("usuarioId", usuario.id).apply()
+        } else {
+            sesion.edit().remove("usuarioId").apply()
+        }
     }
 
     suspend fun iniciarSesion(correo: String, clave: String): Usuario? {
         val cuenta = dao.buscar(correo.trim().lowercase())
-        usuarioActual = if (cuenta != null && cuenta.clave == clave) cuenta.aModelo().usuario else null
+        guardarSesion(if (cuenta != null && cuenta.clave == clave) cuenta.aModelo().usuario else null)
         return usuarioActual
     }
 
     // La cuenta sigue guardada en Room; solo se olvida quien esta usando la app
     fun cerrarSesion() {
-        usuarioActual = null
+        guardarSesion(null)
     }
 
     // El correo para mostrarlo en el perfil
@@ -64,7 +86,7 @@ object CuentaRepository {
         )
         val id = dao.insertar(nueva).toInt()
         val usuario = nueva.copy(id = id).aModelo().usuario
-        usuarioActual = usuario
+        guardarSesion(usuario)
         return usuario
     }
 }

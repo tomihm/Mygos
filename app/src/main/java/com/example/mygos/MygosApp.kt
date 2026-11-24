@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 // Se crea una sola vez al abrir la app, antes que cualquier pantalla
 class MygosApp : Application() {
@@ -20,7 +21,10 @@ class MygosApp : Application() {
         super.onCreate()
         val db = Room.databaseBuilder(this, MygosDatabase::class.java, "mygos.db").build()
 
-        CuentaRepository.iniciar(db.cuentaDao())
+        CuentaRepository.iniciar(db.cuentaDao(), getSharedPreferences("sesion", MODE_PRIVATE))
+
+        // Se espera a que termine antes de abrir la primera pantalla, asi la navegacion ya sabe si hay sesion
+        runBlocking { CuentaRepository.restaurarSesion() }
 
         scope.launch { precargar(db) }
     }

@@ -64,7 +64,8 @@ fun MygosNavHost(navController: NavHostController = rememberNavController()) {
     // Al avanzar la pantalla nueva entra desde la derecha; al volver sale hacia la derecha
     NavHost(
         navController = navController,
-        startDestination = Rutas.BIENVENIDA,
+        // Con sesion guardada se entra directo a explorar
+        startDestination = if (CuentaRepository.usuarioActual != null) Rutas.EXPLORAR else Rutas.BIENVENIDA,
         enterTransition = {
             slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start, tween(300)) + fadeIn(tween(300))
         },
