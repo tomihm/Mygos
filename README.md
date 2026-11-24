@@ -29,7 +29,7 @@ App Android para descubrir eventos e ir acompañado: eliges un evento y la app t
 | 🧑‍💼 | **Organizador**: publicar evento (con fecha y hora) y ver mis eventos | ✅ Listo |
 | 👤 | **Perfil** con foto, resumen y cerrar sesión | ✅ Listo |
 | 🖼️ | **Fotos de perfil** ficticias para los usuarios de prueba | ✅ Listo |
-| 🌐 | **Foro de la comunidad** desde una **API externa**: ver, abrir con autor y comentarios, publicar, editar y borrar | ✅ Listo |
+| 🌐 | **Foro de la comunidad** con backend en **Xano**: ver, abrir, publicar, editar, borrar y comentar | ✅ Listo |
  
 ---
  
@@ -41,7 +41,7 @@ App Android para descubrir eventos e ir acompañado: eliges un evento y la app t
 - **Room** (con KSP) para guardar las cuentas en el teléfono
 - **Cámara**: permiso `CAMERA` en tiempo de ejecución + `FileProvider` + `ActivityResultContracts.TakePicture`
 - **GPS**: permisos de ubicación + `FusedLocationProviderClient` (Google Play Services Location)
-- **Retrofit** + **Gson** para consumir la API REST del foro, con corrutinas (`suspend`)
+- **Retrofit** + **Gson** para consumir la API REST del foro hecha en **Xano**, con corrutinas (`suspend`)
 - **Pruebas unitarias** con JUnit en `app/src/test`
 - Animaciones de Compose: `AnimatedVisibility`, `animateColorAsState`, `Animatable`, `spring`, `rememberInfiniteTransition`, `animateItem`
 - Modales: `AlertDialog` (salir de tribu, cerrar sesión), `DatePickerDialog` y selector de hora
@@ -56,7 +56,7 @@ app/src/main/java/com/example/mygos/
 ├── MainActivity.kt, MygosApp.kt   # Entrada de la app; MygosApp crea la base de datos
 ├── Datos.kt                       # Modelos: Usuario, Cuenta, Evento, Tribu, Publicacion, Mensaje
 ├── data/                          # Room (entidad, DAO, base) y datos de ejemplo
-├── remote/ForoApi.kt              # Retrofit: endpoints, modelos del JSON y cliente
+├── remote/ForoApi.kt              # Retrofit: endpoints de Xano, modelos del JSON y cliente
 ├── repository/                    # Fuente de datos de cada tema (cuentas, eventos, tribus, chat, muro, foro)
 ├── validacion/Validaciones.kt     # Todas las reglas de los formularios, sin UI
 ├── viewmodel/                     # Un ViewModel por pantalla, con su estado
@@ -84,26 +84,26 @@ Cada pantalla tiene dos funciones: `XRuta` conecta el ViewModel y `XScreen` solo
 | 2.2.1 Validación desacoplada | `validacion/Validaciones.kt` + ViewModels de formularios |
 | 2.2.2 Animaciones | tarjeta del carrusel en `ui/tribus/TribusScreen.kt`, celebración en `TribuScreen.kt`, transiciones en `Navegacion.kt`, sacudida en `CampoTexto`, error del login en `CuentaScreen.kt`, pulso en `EncuentroScreen.kt`, `animateItem` en chat |
 | 2.3.1 Modularidad y persistencia | paquetes de arriba + Room en `data/` |
-| API externa (7 endpoints) | `remote/ForoApi.kt`, `repository/ForoRepository.kt`, `viewmodel/ForoViewModel.kt`, `ui/foro/ForoScreen.kt` |
+| API externa en Xano (7 endpoints) | `remote/ForoApi.kt`, `repository/ForoRepository.kt`, `viewmodel/ForoViewModel.kt`, `ui/foro/ForoScreen.kt` |
 | Pruebas unitarias | `app/src/test/java/com/example/mygos/` |
 | APK firmado e ícono | `signingConfigs` en `app/build.gradle.kts`, `res/drawable/ic_launcher_*.xml` |
 | 2.4.1 Recursos del dispositivo | cámara en `ui/tribus/MuroScreen.kt`, GPS en `ui/tribus/EncuentroScreen.kt`, permisos en `AndroidManifest.xml` |
  
 ---
  
-## 🌐 API externa
+## 🌐 API externa (Xano)
 
-El foro usa [JSONPlaceholder](https://jsonplaceholder.typicode.com), una API REST pública de prueba. Responde como si guardara los cambios, pero no los guarda: lo que se publica o edita queda solo en el teléfono mientras la pantalla está abierta.
+El foro usa un backend propio hecho en [Xano](https://www.xano.com), con dos tablas: `publicacion` (titulo, cuerpo, autor) y `comentario` (publicacion_id, autor, texto). Xano genera los endpoints REST de cada tabla y los datos quedan guardados en la nube.
 
 | # | Método | Endpoint | Uso en la app |
 |---|---|---|---|
-| 1 | GET | `/posts` | Lista del foro (primeras 20) |
-| 2 | GET | `/posts/{id}` | Abrir una publicación |
-| 3 | GET | `/posts/{id}/comments` | Comentarios de la publicación |
-| 4 | GET | `/users/{id}` | Nombre del autor |
-| 5 | POST | `/posts` | Publicar |
-| 6 | PUT | `/posts/{id}` | Guardar cambios |
-| 7 | DELETE | `/posts/{id}` | Borrar |
+| 1 | GET | `/publicacion` | Lista del foro, las más nuevas primero |
+| 2 | GET | `/publicacion/{id}` | Abrir una publicación |
+| 3 | POST | `/publicacion` | Publicar |
+| 4 | PATCH | `/publicacion/{id}` | Guardar cambios |
+| 5 | DELETE | `/publicacion/{id}` | Borrar |
+| 6 | GET | `/comentario` | Comentarios de la publicación abierta |
+| 7 | POST | `/comentario` | Comentar |
 
 Capas: `ForoScreen` (UI) → `ForoViewModel` (estado, validación y errores de conexión) → `ForoRepository` → `ForoApi` (Retrofit).
 
@@ -116,7 +116,7 @@ Capas: `ForoScreen` (UI) → `ForoViewModel` (estado, validación y errores de c
 ```
 
 - `ValidacionesTest`: correo, clave, fecha y título de publicación.
-- `ForoRepositoryTest`: usa una API falsa (sin internet) para revisar que la lista se corta en 20 y que al publicar se envía el texto sin espacios sobrantes.
+- `ForoRepositoryTest`: usa una API falsa (sin internet) para revisar que las publicaciones más nuevas van primero, que al publicar se envía el texto sin espacios sobrantes y que solo llegan los comentarios de la publicación abierta.
 
 ---
 
