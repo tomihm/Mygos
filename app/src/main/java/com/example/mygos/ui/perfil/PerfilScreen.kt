@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -72,6 +73,7 @@ fun PerfilRuta(
     onIrASeccion: (Seccion) -> Unit,
     onMisEventos: () -> Unit,
     onPublicar: () -> Unit,
+    onForo: () -> Unit,
     onSesionCerrada: () -> Unit,
     viewModel: PerfilViewModel = viewModel { PerfilViewModel(usuario.id) }
 ) {
@@ -82,6 +84,7 @@ fun PerfilRuta(
         onIrASeccion = onIrASeccion,
         onMisEventos = onMisEventos,
         onPublicar = onPublicar,
+        onForo = onForo,
         onPedirCerrar = viewModel::pedirCerrarSesion,
         onCancelarCerrar = viewModel::cancelarCierre,
         onCerrar = {
@@ -98,6 +101,7 @@ fun PerfilScreen(
     onIrASeccion: (Seccion) -> Unit,
     onMisEventos: () -> Unit,
     onPublicar: () -> Unit,
+    onForo: () -> Unit,
     onPedirCerrar: () -> Unit,
     onCancelarCerrar: () -> Unit,
     onCerrar: () -> Unit
@@ -178,6 +182,10 @@ fun PerfilScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 FilaOpcion(Icons.Filled.Add, "Publicar un evento", onPublicar)
                 Spacer(modifier = Modifier.height(22.dp))
+                Subtitulo("Comunidad")
+                Spacer(modifier = Modifier.height(10.dp))
+                FilaOpcion(Icons.Filled.Forum, "Foro de la comunidad", onForo)
+                Spacer(modifier = Modifier.height(22.dp))
                 BotonContorno(texto = "Cerrar sesión", onClick = onPedirCerrar, icono = Icons.AutoMirrored.Filled.Logout)
                 Spacer(modifier = Modifier.height(20.dp))
             }
@@ -229,6 +237,6 @@ fun FilaOpcion(icono: ImageVector, texto: String, onClick: () -> Unit) {
 @Composable
 fun PerfilPreview() {
     MygosTheme {
-        PerfilScreen(valeM, PerfilEstado("vale@mygos.cl", 1, 0), {}, {}, {}, {}, {}, {})
+        PerfilScreen(valeM, PerfilEstado("vale@mygos.cl", 1, 0), {}, {}, {}, {}, {}, {}, {})
     }
 }

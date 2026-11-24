@@ -22,6 +22,7 @@ import com.example.mygos.ui.eventos.EventoRuta
 import com.example.mygos.ui.eventos.ExplorarRuta
 import com.example.mygos.ui.eventos.MisEventosRuta
 import com.example.mygos.ui.eventos.PublicarEventoRuta
+import com.example.mygos.ui.foro.ForoRuta
 import com.example.mygos.ui.perfil.PerfilRuta
 import com.example.mygos.ui.tribus.ChatRuta
 import com.example.mygos.ui.tribus.EncuentroRuta
@@ -47,6 +48,7 @@ object Rutas {
     const val PERFIL = "perfil"
     const val MIS_EVENTOS = "mis_eventos"
     const val PUBLICAR_EVENTO = "publicar_evento"
+    const val FORO = "foro"
 
     fun evento(id: Int) = "evento/$id"
     fun tribus(id: Int) = "tribus/$id"
@@ -237,6 +239,7 @@ fun MygosNavHost(navController: NavHostController = rememberNavController()) {
                     onIrASeccion = { irASeccion(navController, it) },
                     onMisEventos = { navController.navigate(Rutas.MIS_EVENTOS) },
                     onPublicar = { navController.navigate(Rutas.PUBLICAR_EVENTO) },
+                    onForo = { navController.navigate(Rutas.FORO) },
                     // borra toda la pila: con "atras" no se puede volver a una pantalla de la sesion cerrada
                     onSesionCerrada = {
                         navController.navigate(Rutas.BIENVENIDA) {
@@ -245,6 +248,10 @@ fun MygosNavHost(navController: NavHostController = rememberNavController()) {
                     }
                 )
             }
+        }
+
+        composable(Rutas.FORO) {
+            ForoRuta(onVolver = { navController.popBackStack() })
         }
 
         composable(Rutas.MIS_EVENTOS) {
