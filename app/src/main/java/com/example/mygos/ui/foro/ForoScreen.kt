@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mygos.Usuario
 import com.example.mygos.remote.PublicacionForo
 import com.example.mygos.ui.componentes.BotonContorno
 import com.example.mygos.ui.componentes.BotonNaranja
@@ -56,7 +57,7 @@ import com.example.mygos.viewmodel.ForoEstado
 import com.example.mygos.viewmodel.ForoViewModel
 
 @Composable
-fun ForoRuta(onVolver: () -> Unit, viewModel: ForoViewModel = viewModel()) {
+fun ForoRuta(usuario: Usuario, onVolver: () -> Unit, viewModel: ForoViewModel = viewModel { ForoViewModel(usuario.nombre) }) {
     val estado by viewModel.estado.collectAsState()
     ForoScreen(
         estado = estado,
@@ -69,7 +70,9 @@ fun ForoRuta(onVolver: () -> Unit, viewModel: ForoViewModel = viewModel()) {
         onEditar = viewModel::empezarEdicion,
         onBorrar = viewModel::borrar,
         onAbrir = viewModel::abrir,
-        onCerrar = viewModel::cerrar
+        onCerrar = viewModel::cerrar,
+        onCambiarComentario = viewModel::cambiarComentario,
+        onComentar = viewModel::comentar
     )
 }
 
@@ -85,7 +88,9 @@ fun ForoScreen(
     onEditar: (PublicacionForo) -> Unit,
     onBorrar: (PublicacionForo) -> Unit,
     onAbrir: (PublicacionForo) -> Unit,
-    onCerrar: () -> Unit
+    onCerrar: () -> Unit,
+    onCambiarComentario: (String) -> Unit,
+    onComentar: () -> Unit
 ) {
     val foco = LocalFocusManager.current
     Column(
@@ -93,7 +98,7 @@ fun ForoScreen(
             .fillMaxSize()
             .background(Fondo)
     ) {
-        Cabecera(titulo = "Foro de la comunidad", subtitulo = "Publicaciones de prueba desde JSONPlaceholder", onVolver = onVolver)
+        Cabecera(titulo = "Foro de la comunidad", subtitulo = "Ideas y recomendaciones de otros usuarios", onVolver = onVolver)
 
         LazyColumn(
             modifier = Modifier.weight(1f),
@@ -136,7 +141,7 @@ fun ForoScreen(
                     CircularProgressIndicator(color = Naranja, modifier = Modifier.padding(30.dp))
                 }
             }
-            items(estado.publicaciones, key = { it.id }) { publicacion ->
+            items(estado.publicaciones, key = { it.id ?: 0 }) { publicacion ->
                 TarjetaPublicacion(
                     publicacion = publicacion,
                     onAbrir = { onAbrir(publicacion) },
@@ -155,15 +160,20 @@ fun ForoScreen(
             title = { Text(abierta.titulo, fontFamily = Nunito, fontWeight = FontWeight.Black) },
             text = {
                 Column(modifier = Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
-                    Text("Por ${estado.autor?.nombre ?: "ti"}", color = Naranja, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
+                    Text("Por ${abierta.autor}", color = Naranja, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(abierta.cuerpo, fontFamily = Nunito)
                     Spacer(modifier = Modifier.height(14.dp))
                     Text("Comentarios (${estado.comentarios.size})", color = TextoClaro, fontFamily = Nunito, fontWeight = FontWeight.Black)
                     estado.comentarios.forEach { comentario ->
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(comentario.correo, color = TextoGris, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        Text(comentario.autor, color = TextoGris, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         Text(comentario.texto, fontFamily = Nunito, fontSize = 13.sp)
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    CampoTexto(estado.comentario, onCambiarComentario, "Escribe un comentario", Icons.Filled.Edit, error = estado.errorComentario)
+                    TextButton(onClick = onComentar) {
+                        Text("Comentar", color = Naranja, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
                     }
                 }
             },
@@ -191,6 +201,7 @@ fun TarjetaPublicacion(publicacion: PublicacionForo, onAbrir: () -> Unit, onEdit
             .padding(14.dp)
     ) {
         Text(publicacion.titulo, color = TextoClaro, fontFamily = Nunito, fontWeight = FontWeight.Black, fontSize = 15.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(publicacion.autor, color = Naranja, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(4.dp))
         Text(publicacion.cuerpo, color = TextoSuave, fontFamily = Nunito, fontSize = 13.sp, maxLines = 3, overflow = TextOverflow.Ellipsis)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
@@ -209,8 +220,8 @@ fun TarjetaPublicacion(publicacion: PublicacionForo, onAbrir: () -> Unit, onEdit
 fun ForoPreview() {
     MygosTheme {
         ForoScreen(
-            ForoEstado(cargando = false, publicaciones = listOf(PublicacionForo(1, 1, "Mejor café cerca del parque", "Vayan temprano que se llena"))),
-            {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+            ForoEstado(cargando = false, publicaciones = listOf(PublicacionForo(1, "Mejor café cerca del parque", "Vayan temprano que se llena", "Vale_M"))),
+            {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
         )
     }
 }

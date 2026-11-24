@@ -251,7 +251,9 @@ fun MygosNavHost(navController: NavHostController = rememberNavController()) {
         }
 
         composable(Rutas.FORO) {
-            ForoRuta(onVolver = { navController.popBackStack() })
+            ConSesion(navController) { usuario ->
+                ForoRuta(usuario = usuario, onVolver = { navController.popBackStack() })
+            }
         }
 
         composable(Rutas.MIS_EVENTOS) {
