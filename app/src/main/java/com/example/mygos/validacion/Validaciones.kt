@@ -65,4 +65,10 @@ object Validaciones {
         valor.length > 300 -> "Máximo 300 caracteres"
         else -> ""
     }
+
+    fun tituloPublicacion(valor: String): String = when {
+        valor.isBlank() -> "Escribe un título"
+        valor.trim().length > 100 -> "Máximo 100 caracteres"
+        else -> ""
+    }
 }
