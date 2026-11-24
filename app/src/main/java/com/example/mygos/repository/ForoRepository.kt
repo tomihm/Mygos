@@ -21,7 +21,7 @@ class ForoRepository(private val api: ForoApi = ClienteApi.foro) {
 
     suspend fun borrar(id: Int) = api.borrar(id)
 
-    // shortcut: trae todos los comentarios y filtra aqui; si crecen, agregar un filtro por publicacion_id en Xano
+    // Xano entrega todos los comentarios y aqui se dejan solo los de la publicacion. Si fueran muchos, convendria filtrarlos en Xano
     suspend fun comentarios(publicacionId: Int): List<Comentario> =
         api.comentarios().filter { it.publicacionId == publicacionId }
 

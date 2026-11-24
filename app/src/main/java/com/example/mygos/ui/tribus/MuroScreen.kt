@@ -300,7 +300,7 @@ fun CasillaFoto(publicacion: Publicacion, modifier: Modifier = Modifier) {
 
 // Lee la foto fuera del hilo principal para no trabar la pantalla.
 // inSampleSize = 4 la carga a un cuarto del tamano: una casilla chica no necesita los 12 megapixeles
-// shortcut: no se corrige la rotacion EXIF; usar ExifInterface si en un telefono real la foto sale girada
+// No se corrige la rotacion de la foto. Si en algun telefono sale girada, se puede leer con ExifInterface
 @Composable
 fun fotoDesdeUri(direccion: String): ImageBitmap? {
     val context = LocalContext.current

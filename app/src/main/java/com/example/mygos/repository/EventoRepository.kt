@@ -67,7 +67,7 @@ object EventoRepository {
                 fecha = "${dias[dia.get(Calendar.DAY_OF_WEEK) - 1]} $numero de $mes",
                 horario = hora,
                 lugar = lugar.trim(),
-                // shortcut: los eventos nuevos usan el centro de Santiago; pedir la ubicacion en el formulario si se necesita
+                // Los eventos nuevos quedan en el centro de Santiago porque el formulario todavia no pide la ubicacion
                 latitud = -33.4372,
                 longitud = -70.6506,
                 detalleLugar = "Publicado por ${organizador.nombre}",
